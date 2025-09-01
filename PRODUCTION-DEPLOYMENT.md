@@ -9,7 +9,7 @@ Your energy.pulse application is fully configured and ready to deploy with:
 - ✅ **AI Analysis Engine** (Groq + Tavily integration)  
 - ✅ **Telegram Bot** with source links
 - ✅ **User Signup System** (Supabase integration)
-- ✅ **Automated Messages** every 8 hours
+- ✅ **Automated Messages** daily at 9 AM UTC
 - ✅ **Professional Design** (energy.pulse branding)
 
 ---
@@ -65,7 +65,7 @@ Replace `[YOUR_BOT_TOKEN]` with your actual bot token from `.env.local`
 - Simple signup form
 - Direct Telegram bot link
 
-### **Telegram Bot Messages (Every 8 Hours):**
+### **Telegram Bot Messages (Daily at 9 AM UTC):**
 ```
 🔥 Energy Insights AI - Jan 15, 2024
 
@@ -105,7 +105,7 @@ Your energy market intelligence platform is now live and fully functional:
 - ✅ **AI analysis** from Groq  
 - ✅ **News research** from Tavily
 - ✅ **Telegram delivery** with source links
-- ✅ **Automated schedule** every 8 hours
+- ✅ **Automated schedule** daily at 9 AM UTC
 - ✅ **Professional UI** with live tickers
 
 **Ready to serve users and generate revenue!** 💰
