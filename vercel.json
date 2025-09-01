@@ -1,0 +1,54 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/cron/route.ts": {
+      "maxDuration": 300
+    },
+    "src/app/api/analyze/route.ts": {
+      "maxDuration": 180
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 8,18 * * *"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/telegram-webhook",
+      "destination": "/api/telegram"
+    }
+  ]
+}
+
+
+
+
+
+
+

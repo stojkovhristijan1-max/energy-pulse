@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-slate-900 text-white;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-slate-800 rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-purple-500 to-green-500 rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply from-purple-600 to-green-600;
+  }
+
+  /* Gradient text effect */
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-400 to-green-400 bg-clip-text text-transparent;
+  }
+
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
+
+  /* Hover glow effect */
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/20;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-green-600 hover:from-purple-700 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-lg border border-slate-600 hover:border-slate-500 transition-all duration-300;
+  }
+
+  /* Input styles */
+  .input-primary {
+    @apply bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300;
+  }
+
+  /* Status indicators */
+  .status-online {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+  }
+
+  .status-offline {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+  }
+
+  .status-warning {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Text utilities */
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Background utilities */
+  .bg-gradient-radial {
+    background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+  }
+
+  .bg-gradient-conic {
+    background: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
+  }
+
+  /* Backdrop utilities */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+
+  /* Custom grid */
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+
+  .grid-auto-fill {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+/* Custom keyframes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 20px #8B5CF6, 0 0 30px #8B5CF6, 0 0 40px #8B5CF6;
+  }
+  to {
+    text-shadow: 0 0 30px #10B981, 0 0 40px #10B981, 0 0 50px #10B981;
+  }
+}
+
+/* Loading animations */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 468px 100%;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply bg-white text-black;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2 border-white;
+  }
+  
+  .btn-primary {
+    @apply border-2 border-white;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-glow,
+  .animate-pulse-slow {
+    animation: none;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+
+
+
+
+
+

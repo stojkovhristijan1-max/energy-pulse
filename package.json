@@ -1,0 +1,57 @@
+{
+  "name": "energy-pulse",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "analyze": "ANALYZE=true npm run build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "groq-sdk": "^0.5.0",
+    "lucide-react": "^0.300.0",
+    "next": "^14.2.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "yahoo-finance2": "^2.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/node-telegram-bot-api": "^0.64.7",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.2.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "energy",
+    "market-analysis",
+    "ai",
+    "telegram-bot",
+    "nextjs",
+    "typescript",
+    "supabase",
+    "trading",
+    "commodities"
+  ],
+  "author": "tcheevy.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/energy-pulse.git"
+  }
+}
+
