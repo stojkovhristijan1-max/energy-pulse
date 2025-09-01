@@ -69,7 +69,7 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult): string {
 🔥 *Energy Insights AI - ${date}*
 
 📊 *Market Summary:*
-${analysis.summary.map((point: string) => `• ${point}`).join('\n')}
+${analysis.summary.map((point: any) => `• ${point.text}\n  📰 [Source](${point.source_url})`).join('\n\n')}
 
 📈 *Probabilistic Outcomes (Next 1-7 Days):*
 

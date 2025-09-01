@@ -17,6 +17,7 @@ CURRENT NEWS DATA:
 ${newsData.map((article, i) => `
 ${i + 1}. ${article.title}
    Published: ${new Date(article.published_date).toLocaleDateString()}
+   URL: ${article.url}
    Content: ${article.content.substring(0, 300)}...
    Relevance Score: ${article.score}
 `).join('\n')}
@@ -26,15 +27,30 @@ ${marketData.map(data => `
 ${data.symbol}: $${data.price} (${data.change_percent > 0 ? '+' : ''}${data.change_percent.toFixed(2)}%)
 `).join('')}
 
-Please provide your analysis in the following JSON format:
+Please provide your analysis in the following JSON format. For each summary bullet point, include the most relevant source URL from the news data provided:
 
 {
   "summary": [
-    "Key bullet point 1 about today's energy developments",
-    "Key bullet point 2 about market-moving events", 
-    "Key bullet point 3 about geopolitical factors",
-    "Key bullet point 4 about supply/demand dynamics",
-    "Key bullet point 5 about regulatory/policy impacts"
+    {
+      "text": "Key bullet point 1 about today's energy developments",
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 2 about market-moving events",
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 3 about geopolitical factors", 
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 4 about supply/demand dynamics",
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 5 about regulatory/policy impacts",
+      "source_url": "URL from the news data that supports this point"
+    }
   ],
   "predictions": {
     "crude_oil": {

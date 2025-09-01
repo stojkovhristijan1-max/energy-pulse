@@ -31,7 +31,10 @@ export interface MarketPrediction {
 
 export interface AnalysisResult {
   id: string;
-  summary: string[];
+  summary: Array<{
+    text: string;
+    source_url: string;
+  }>;
   predictions: {
     crude_oil: MarketPrediction;
     natural_gas: MarketPrediction;
