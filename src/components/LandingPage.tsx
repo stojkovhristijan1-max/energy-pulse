@@ -26,16 +26,46 @@ import {
 export function LandingPage() {
   const [showSignup, setShowSignup] = useState(false);
   const [currentTicker, setCurrentTicker] = useState(0);
+  const [marketTickers, setMarketTickers] = useState([
+    { symbol: "WTI", price: "Loading...", change: 0, changePercent: 0 },
+    { symbol: "BRENT", price: "Loading...", change: 0, changePercent: 0 },
+    { symbol: "NATGAS", price: "Loading...", change: 0, changePercent: 0 },
+    { symbol: "XLE", price: "Loading...", change: 0, changePercent: 0 },
+    { symbol: "NEE", price: "Loading...", change: 0, changePercent: 0 },
+    { symbol: "ENPH", price: "Loading...", change: 0, changePercent: 0 }
+  ]);
 
-  // Mock market data for tickers
-  const marketTickers = [
-    { symbol: "WTI", price: 78.45, change: 2.34, changePercent: 3.08 },
-    { symbol: "BRENT", price: 82.17, change: 1.89, changePercent: 2.35 },
-    { symbol: "NATGAS", price: 2.89, change: -0.12, changePercent: -3.98 },
-    { symbol: "XLE", price: 89.23, change: 0.87, changePercent: 0.98 },
-    { symbol: "NEE", price: 64.78, change: 1.23, changePercent: 1.93 },
-    { symbol: "ENPH", price: 127.45, change: -2.34, changePercent: -1.81 }
-  ];
+  // Fetch real market data
+  useEffect(() => {
+    const fetchMarketData = async () => {
+      try {
+        const response = await fetch('/api/market-data');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            // Map the real data to our ticker format
+            const tickerData = [
+              { symbol: "WTI", price: data.data.find(d => d.symbol === 'CL=F')?.price || "N/A", change: data.data.find(d => d.symbol === 'CL=F')?.change || 0, changePercent: data.data.find(d => d.symbol === 'CL=F')?.changePercent || 0 },
+              { symbol: "BRENT", price: data.data.find(d => d.symbol === 'BZ=F')?.price || "N/A", change: data.data.find(d => d.symbol === 'BZ=F')?.change || 0, changePercent: data.data.find(d => d.symbol === 'BZ=F')?.changePercent || 0 },
+              { symbol: "NATGAS", price: data.data.find(d => d.symbol === 'NG=F')?.price || "N/A", change: data.data.find(d => d.symbol === 'NG=F')?.change || 0, changePercent: data.data.find(d => d.symbol === 'NG=F')?.changePercent || 0 },
+              { symbol: "XLE", price: data.data.find(d => d.symbol === 'XLE')?.price || "N/A", change: data.data.find(d => d.symbol === 'XLE')?.change || 0, changePercent: data.data.find(d => d.symbol === 'XLE')?.changePercent || 0 },
+              { symbol: "NEE", price: data.data.find(d => d.symbol === 'NEE')?.price || "N/A", change: data.data.find(d => d.symbol === 'NEE')?.change || 0, changePercent: data.data.find(d => d.symbol === 'NEE')?.changePercent || 0 },
+              { symbol: "ENPH", price: data.data.find(d => d.symbol === 'ENPH')?.price || "N/A", change: data.data.find(d => d.symbol === 'ENPH')?.change || 0, changePercent: data.data.find(d => d.symbol === 'ENPH')?.changePercent || 0 }
+            ];
+            setMarketTickers(tickerData);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch market data:', error);
+        // Keep loading state or show error
+      }
+    };
+
+    fetchMarketData();
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchMarketData, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Rotate tickers
   useEffect(() => {
@@ -157,20 +187,7 @@ export function LandingPage() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:flex items-center space-x-6 text-sm text-gray-300">
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Markets</span>
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Analysis</span>
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Insights</span>
-            </div>
-            <button
-              onClick={() => setShowSignup(!showSignup)}
-              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black px-8 py-3 rounded-xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10">Connect Now</span>
-            </button>
-          </div>
+
         </nav>
       </header>
 
