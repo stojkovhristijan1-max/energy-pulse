@@ -45,12 +45,12 @@ export function LandingPage() {
           if (data.success && data.data) {
             // Map the real data to our ticker format
             const tickerData = [
-              { symbol: "WTI", price: data.data.find(d => d.symbol === 'CL=F')?.price || "N/A", change: data.data.find(d => d.symbol === 'CL=F')?.change || 0, changePercent: data.data.find(d => d.symbol === 'CL=F')?.changePercent || 0 },
-              { symbol: "BRENT", price: data.data.find(d => d.symbol === 'BZ=F')?.price || "N/A", change: data.data.find(d => d.symbol === 'BZ=F')?.change || 0, changePercent: data.data.find(d => d.symbol === 'BZ=F')?.changePercent || 0 },
-              { symbol: "NATGAS", price: data.data.find(d => d.symbol === 'NG=F')?.price || "N/A", change: data.data.find(d => d.symbol === 'NG=F')?.change || 0, changePercent: data.data.find(d => d.symbol === 'NG=F')?.changePercent || 0 },
-              { symbol: "XLE", price: data.data.find(d => d.symbol === 'XLE')?.price || "N/A", change: data.data.find(d => d.symbol === 'XLE')?.change || 0, changePercent: data.data.find(d => d.symbol === 'XLE')?.changePercent || 0 },
-              { symbol: "NEE", price: data.data.find(d => d.symbol === 'NEE')?.price || "N/A", change: data.data.find(d => d.symbol === 'NEE')?.change || 0, changePercent: data.data.find(d => d.symbol === 'NEE')?.changePercent || 0 },
-              { symbol: "ENPH", price: data.data.find(d => d.symbol === 'ENPH')?.price || "N/A", change: data.data.find(d => d.symbol === 'ENPH')?.change || 0, changePercent: data.data.find(d => d.symbol === 'ENPH')?.changePercent || 0 }
+              { symbol: "WTI", price: data.data.find((d: any) => d.symbol === 'CL=F')?.price || "N/A", change: data.data.find((d: any) => d.symbol === 'CL=F')?.change || 0, changePercent: data.data.find((d: any) => d.symbol === 'CL=F')?.changePercent || 0 },
+              { symbol: "BRENT", price: data.data.find((d: any) => d.symbol === 'BZ=F')?.price || "N/A", change: data.data.find((d: any) => d.symbol === 'BZ=F')?.change || 0, changePercent: data.data.find((d: any) => d.symbol === 'BZ=F')?.changePercent || 0 },
+              { symbol: "NATGAS", price: data.data.find((d: any) => d.symbol === 'NG=F')?.price || "N/A", change: data.data.find((d: any) => d.symbol === 'NG=F')?.change || 0, changePercent: data.data.find((d: any) => d.symbol === 'NG=F')?.changePercent || 0 },
+              { symbol: "XLE", price: data.data.find((d: any) => d.symbol === 'XLE')?.price || "N/A", change: data.data.find((d: any) => d.symbol === 'XLE')?.change || 0, changePercent: data.data.find((d: any) => d.symbol === 'XLE')?.changePercent || 0 },
+              { symbol: "NEE", price: data.data.find((d: any) => d.symbol === 'NEE')?.price || "N/A", change: data.data.find((d: any) => d.symbol === 'NEE')?.change || 0, changePercent: data.data.find((d: any) => d.symbol === 'NEE')?.changePercent || 0 },
+              { symbol: "ENPH", price: data.data.find((d: any) => d.symbol === 'ENPH')?.price || "N/A", change: data.data.find((d: any) => d.symbol === 'ENPH')?.change || 0, changePercent: data.data.find((d: any) => d.symbol === 'ENPH')?.changePercent || 0 }
             ];
             setMarketTickers(tickerData);
           }

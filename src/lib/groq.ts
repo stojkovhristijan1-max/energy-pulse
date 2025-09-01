@@ -127,11 +127,11 @@ ANALYSIS GUIDELINES:
     // Fallback analysis if API fails
     return {
       summary: [
-        'Market analysis temporarily unavailable due to technical issues',
-        'Please check back later for updated insights',
-        'Current market conditions require careful monitoring',
-        'Energy sector showing mixed signals',
-        'Recommend staying informed on key developments'
+        { text: 'Market analysis temporarily unavailable due to technical issues', source_url: 'https://energy-pulse.vercel.app' },
+        { text: 'Please check back later for updated insights', source_url: 'https://energy-pulse.vercel.app' },
+        { text: 'Current market conditions require careful monitoring', source_url: 'https://energy-pulse.vercel.app' },
+        { text: 'Energy sector showing mixed signals', source_url: 'https://energy-pulse.vercel.app' },
+        { text: 'Recommend staying informed on key developments', source_url: 'https://energy-pulse.vercel.app' }
       ],
       predictions: {
         crude_oil: {
