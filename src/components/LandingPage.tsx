@@ -248,7 +248,7 @@ export function LandingPage() {
                   rel="noopener noreferrer"
                   className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-8 py-3 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20 shadow-2xl inline-block"
                 >
-                  Connect to Bot
+                  Start Bot & Subscribe
                 </a>
               </div>
             </div>

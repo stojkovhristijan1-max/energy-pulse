@@ -200,7 +200,7 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
     await addSubscriber(chatId, username);
     
     if (text?.startsWith('/start')) {
-      await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\nYou're now subscribed to daily AI-powered energy market analysis! 🚀\n\n⚡ *What you'll receive:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n⏰ *Daily briefing at 22:30 CEST (20:30 UTC)*\n\n🚀 Your first analysis is coming soon!\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
+      await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\n✅ *You're automatically subscribed!* No further action needed.\n\n⚡ *What you'll receive daily at 22:30 CEST:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n🚀 *You're all set! Just wait for your daily analysis.*\n\n💡 *Optional Commands:*\n/status - Check subscription\n/help - More info\n/unsubscribe - Stop updates\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true
       });
@@ -242,7 +242,7 @@ Energy Pulse AI provides professional-grade energy market intelligence using adv
       
     } else {
       // Any other message - auto-subscribe and send welcome
-      await bot!.sendMessage(chatId, `👋 *Hello @${username}!*\n\nYou're now automatically subscribed to Energy Pulse AI! 🚀\n\n📊 You'll receive daily energy market analysis at *22:30 CEST*\n\n💡 *Commands:*\n/status - Check subscription\n/help - More info\n/unsubscribe - Stop updates\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
+      await bot!.sendMessage(chatId, `👋 *Hello @${username}!*\n\n🎉 *Perfect! You're now subscribed to Energy Pulse AI!* 🚀\n\n📊 You'll automatically receive daily energy market analysis at *22:30 CEST* - no further action needed!\n\n💡 *Optional Commands:*\n/status - Check subscription\n/help - More info\n/unsubscribe - Stop updates\n\n✅ *You're all set! Just wait for your daily analysis.*\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true
       });
