@@ -267,15 +267,17 @@ export function LandingPage() {
             </div>
           </div>
 
-            {/* Enhanced Call-to-Action Button */}
+          {/* Centered Call-to-Action Button */}
+          <div className="flex justify-center items-center mt-12">
             <div className="relative inline-block group">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300 scale-110"></div>
               <button
                 onClick={() => setShowSignup(true)}
                 className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-12 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20"
-            >
-              Connect to Telegram Bot
-            </button>
+              >
+                Connect to Telegram Bot
+              </button>
+            </div>
           </div>
 
 
