@@ -161,34 +161,32 @@ export function LandingPage() {
         </div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 px-6 py-6">
-        <nav className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            {/* Professional Energy.Pulse Logo */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-lg blur-sm opacity-60"></div>
-              <div className="relative bg-black border border-emerald-400/30 rounded-lg p-3 backdrop-blur-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="relative">
-                    <Battery className="w-6 h-6 text-emerald-400" />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
-                  </div>
-                  <div className="h-6 w-px bg-emerald-400/50"></div>
-                  <Activity className="w-5 h-5 text-green-400 animate-pulse" />
+      {/* Header with Centered Logo */}
+      <header className="relative z-10 px-6 py-12">
+        <div className="max-w-7xl mx-auto text-center">
+          {/* Centered Energy.Pulse Logo */}
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-xl blur-sm opacity-40 scale-110"></div>
+            <div className="relative bg-black border border-emerald-400/40 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-center space-x-3">
+                <div className="relative">
+                  <Battery className="w-8 h-8 text-emerald-400" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full animate-pulse"></div>
                 </div>
+                <div className="h-8 w-px bg-emerald-400/60"></div>
+                <Activity className="w-6 h-6 text-green-400 animate-pulse" />
               </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-light text-white tracking-wide">
-                energy<span className="text-emerald-400 font-semibold">.pulse</span>
-              </h1>
-              <div className="text-xs text-emerald-400/70 font-mono tracking-wider">MARKET INTELLIGENCE</div>
-            </div>
           </div>
-          
 
-        </nav>
+          {/* Brand Name */}
+          <div className="mb-2">
+            <h1 className="text-4xl font-light text-white tracking-wider mb-2">
+              energy<span className="text-emerald-400 font-semibold animate-pulse">.pulse</span>
+            </h1>
+            <div className="text-sm text-emerald-400/80 font-mono tracking-widest uppercase">Market Intelligence</div>
+          </div>
+        </div>
       </header>
 
       {/* Hero Section */}
@@ -205,16 +203,76 @@ export function LandingPage() {
             <Battery className="w-16 h-16 text-green-400 animate-bounce" />
           </div>
           
-          <div className="text-center mb-16 relative max-w-2xl mx-auto">
-            {/* Simple, honest description */}
-            <p className="text-lg text-gray-300 mb-12 leading-relaxed">
-              Get daily energy market updates sent to your Telegram. Our bot analyzes news and market data to provide simple summaries about oil, gas, and renewable energy trends.
-            </p>
+          {/* Floating Animation Elements */}
+          <div className="absolute top-1/3 left-1/4 w-2 h-2 bg-emerald-400 rounded-full opacity-60 animate-ping" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
+          <div className="absolute top-2/3 right-1/3 w-1.5 h-1.5 bg-green-400 rounded-full opacity-40 animate-ping" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
+          <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-blue-400 rounded-full opacity-50 animate-ping" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
 
-            {/* Simple Sign In Button */}
-            <button
-              onClick={() => setShowSignup(true)}
-              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-12 py-4 rounded-xl font-bold transition-all duration-300 transform hover:scale-105"
+          {/* Beautiful Description Quadrants */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto relative z-10">
+            {/* Top Left Quadrant */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative bg-black/40 backdrop-blur-sm border border-emerald-400/30 rounded-2xl p-6 h-full transform hover:scale-105 transition-all duration-300">
+                <div className="flex items-center mb-4">
+                  <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse mr-3"></div>
+                  <h3 className="text-lg font-semibold text-white">AI-Powered Analysis</h3>
+                </div>
+                <p className="text-gray-300 leading-relaxed">
+                  Advanced AI analyzes real-time market data and breaking news to provide intelligent insights into energy market trends.
+                </p>
+              </div>
+            </div>
+
+            {/* Top Right Quadrant */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-bl from-green-500/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative bg-black/40 backdrop-blur-sm border border-green-400/30 rounded-2xl p-6 h-full transform hover:scale-105 transition-all duration-300">
+                <div className="flex items-center mb-4">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse mr-3"></div>
+                  <h3 className="text-lg font-semibold text-white">Real-Time Data</h3>
+                </div>
+                <p className="text-gray-300 leading-relaxed">
+                  Live market data from Yahoo Finance for WTI Crude, Brent, Natural Gas, and major energy stocks updated every 2 minutes.
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom Left Quadrant */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative bg-black/40 backdrop-blur-sm border border-blue-400/30 rounded-2xl p-6 h-full transform hover:scale-105 transition-all duration-300">
+                <div className="flex items-center mb-4">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse mr-3"></div>
+                  <h3 className="text-lg font-semibold text-white">Daily Telegram Updates</h3>
+                </div>
+                <p className="text-gray-300 leading-relaxed">
+                  Receive professional market intelligence directly in your Telegram with source-attributed news and analysis.
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom Right Quadrant */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-tl from-teal-500/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative bg-black/40 backdrop-blur-sm border border-teal-400/30 rounded-2xl p-6 h-full transform hover:scale-105 transition-all duration-300">
+                <div className="flex items-center mb-4">
+                  <div className="w-3 h-3 bg-teal-400 rounded-full animate-pulse mr-3"></div>
+                  <h3 className="text-lg font-semibold text-white">Premium Sources</h3>
+                </div>
+                <p className="text-gray-300 leading-relaxed">
+                  News from Bloomberg, Reuters, WSJ, and other premium sources with direct links for deeper research.
+                </p>
+              </div>
+            </div>
+          </div>
+
+            {/* Enhanced Call-to-Action Button */}
+            <div className="relative inline-block group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300 scale-110"></div>
+              <button
+                onClick={() => setShowSignup(true)}
+                className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-12 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20"
             >
               Connect to Telegram Bot
             </button>
@@ -242,20 +300,30 @@ export function LandingPage() {
         </div>
       </main>
 
-      {/* Simple Footer */}
-      <footer className="relative z-10 py-8">
-        <div className="text-center">
-          <p className="text-gray-400">
-            Powered by{' '}
-            <a 
-              href="https://tcheevy.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
-            >
-              tcheevy.com
-            </a>
-          </p>
+      {/* Enhanced Footer */}
+      <footer className="relative z-10 py-12 mt-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center">
+            <div className="flex items-center justify-center space-x-4 mb-6">
+              <div className="w-8 h-8 bg-gradient-to-r from-emerald-400 to-green-500 rounded-lg opacity-60"></div>
+              <div className="w-px h-6 bg-emerald-400/40"></div>
+              <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-teal-500 rounded-full opacity-60"></div>
+            </div>
+            <p className="text-gray-400 mb-2">
+              Powered by{' '}
+              <a
+                href="https://tcheevy.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 font-semibold transition-all duration-300 hover:scale-105 inline-block"
+              >
+                tcheevy.com
+              </a>
+            </p>
+            <p className="text-sm text-gray-500">
+              Professional Energy Market Intelligence
+            </p>
+          </div>
         </div>
       </footer>
     </div>
