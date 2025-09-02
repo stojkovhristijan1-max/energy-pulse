@@ -56,6 +56,7 @@ export interface TavilySearchResponse {
 export interface SignupFormData {
   email: string;
   telegram_username: string;
+  verificationCode?: string;
 }
 
 export interface ApiResponse<T = any> {

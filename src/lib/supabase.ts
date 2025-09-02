@@ -19,9 +19,16 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 // User operations
 export async function createUser(email: string, telegram_username: string): Promise<User | null> {
   try {
+    // Generate verification code for Telegram linking
+    const verificationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
     const { data, error } = await supabaseAdmin
       .from('users')
-      .insert([{ email, telegram_username }])
+      .insert([{ 
+        email, 
+        telegram_username,
+        verification_code: verificationCode
+      }])
       .select()
       .single();
 
@@ -54,6 +61,32 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   } catch (error) {
     console.error('Error in getUserByEmail:', error);
     return null;
+  }
+}
+
+export async function linkUserTelegramByCode(verificationCode: string, chatId: string, username: string): Promise<{success: boolean, email?: string}> {
+  try {
+    // Find user by verification code and update their Telegram info
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .update({ 
+        telegram_chat_id: chatId,
+        telegram_username: username,
+        verification_code: null // Clear the code after use
+      })
+      .eq('verification_code', verificationCode)
+      .select('email')
+      .single();
+
+    if (error) {
+      console.error('Error linking user by verification code:', error);
+      return { success: false };
+    }
+
+    return { success: true, email: data.email };
+  } catch (error) {
+    console.error('Error in linkUserTelegramByCode:', error);
+    return { success: false };
   }
 }
 

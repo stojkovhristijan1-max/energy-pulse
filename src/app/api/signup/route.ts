@@ -52,10 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate verification code for Telegram linking
-    const verificationCode = await linkUserTelegramAccount(email, telegram_username);
-
-    console.log(`New user created: ${email} (@${telegram_username})`);
+    console.log(`New user created: ${email} (@${telegram_username}), verification code: ${newUser.verification_code}`);
 
     return NextResponse.json({
       success: true,
@@ -65,7 +62,7 @@ export async function POST(request: NextRequest) {
           email: newUser.email,
           telegram_username: newUser.telegram_username
         },
-        verification_code: verificationCode,
+        verification_code: newUser.verification_code,
         message: 'Account created successfully! Please complete the Telegram setup.'
       }
     } as ApiResponse);

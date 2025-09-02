@@ -1,6 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { AnalysisResult, User } from '@/types';
-import { getActiveUsers, updateUserTelegramChatId, trackNotification } from './supabase';
+import { getActiveUsers, updateUserTelegramChatId, trackNotification, linkUserTelegramByCode } from './supabase';
 
 // Initialize bot (only on server side)
 let bot: TelegramBot | null = null;
@@ -208,10 +208,23 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
 
   try {
     if (text?.startsWith('/start')) {
-      await sendWelcomeMessage(chatId, username);
+      const startParam = text.split(' ')[1]; // Get verification code from /start PARAM
       
-      // Try to link this chat ID with existing user
-      // This would typically be done through a verification process
+      if (startParam) {
+        // User came from website with verification code
+        const linkResult = await linkUserByVerificationCode(startParam, chatId, username);
+        if (linkResult.success) {
+          await bot!.sendMessage(chatId, `🎉 *Account Linked Successfully!*\n\nHello ${linkResult.email}!\n\nYou're now connected to Energy Pulse AI and will receive daily market insights at 9:00 AM UTC.\n\n🚀 Your first analysis is coming soon!`, {
+            parse_mode: 'Markdown'
+          });
+        } else {
+          await bot!.sendMessage(chatId, '❌ Invalid or expired verification code. Please sign up again on the website.');
+        }
+      } else {
+        // Regular start without verification code
+        await sendWelcomeMessage(chatId, username);
+      }
+      
       console.log(`New user started bot: @${username}, chat_id: ${chatId}`);
       
     } else if (text?.startsWith('/status')) {
@@ -292,6 +305,18 @@ export async function linkUserTelegramAccount(email: string, telegramUsername: s
   } catch (error) {
     console.error('Error linking Telegram account:', error);
     return null;
+  }
+}
+
+// Verification code linking system
+export async function linkUserByVerificationCode(verificationCode: string, chatId: string, username: string): Promise<{success: boolean, email?: string}> {
+  try {
+    // Get user by verification code and link their Telegram
+    const result = await linkUserTelegramByCode(verificationCode, chatId, username);
+    return result;
+  } catch (error) {
+    console.error('Error linking user by verification code:', error);
+    return { success: false };
   }
 }
 

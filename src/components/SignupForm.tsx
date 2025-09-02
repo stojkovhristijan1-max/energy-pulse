@@ -51,6 +51,10 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       }
 
       setMessage({ type: 'success', text: 'Account created successfully!' });
+      // Store the verification code from the response
+      if (result.data?.verification_code) {
+        setFormData(prev => ({ ...prev, verificationCode: result.data.verification_code }));
+      }
       setStep('instructions');
       
       // Call onSuccess callback after a delay
@@ -87,14 +91,14 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
           <div className="flex items-start space-x-3 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">1</div>
             <div>
-              <p className="text-white font-semibold">Start a chat with our Telegram bot</p>
+              <p className="text-white font-semibold">Click this link to start the bot</p>
               <a 
-                href={`https://t.me/EnergyInsightsAIBot`}
+                href={`https://t.me/energypulsebot?start=${formData.verificationCode || 'NOCODE'}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-green-400 hover:text-green-300 underline"
               >
-                @EnergyInsightsAIBot
+                🤖 Start Energy Pulse Bot
               </a>
             </div>
           </div>
@@ -102,8 +106,8 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
           <div className="flex items-start space-x-3 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <div className="bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">2</div>
             <div>
-              <p className="text-white font-semibold">Send the command</p>
-              <code className="bg-slate-800 text-green-400 px-2 py-1 rounded text-sm">/start</code>
+              <p className="text-white font-semibold">Your account will be automatically linked!</p>
+              <p className="text-gray-300 text-sm">The bot will confirm your connection and you'll start receiving daily energy insights.</p>
             </div>
           </div>
 

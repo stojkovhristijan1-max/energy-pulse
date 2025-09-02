@@ -7,6 +7,7 @@ CREATE TABLE users (
   email TEXT UNIQUE NOT NULL,
   telegram_username TEXT NOT NULL,
   telegram_chat_id TEXT,
+  verification_code TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
