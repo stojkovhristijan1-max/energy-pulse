@@ -106,28 +106,27 @@ export async function sendWelcomeMessage(chatId: string, username: string): Prom
 
   try {
     const welcomeMessage = `
-🎉 *Welcome to Energy Insights AI!*
+🎉 *Welcome to Energy Pulse AI!*
 
-Hello @${username}! 
+Hello @${username}!
 
-You're now subscribed to receive daily energy market insights powered by advanced AI analysis.
+You've successfully connected to the most advanced energy market intelligence platform. Get daily AI-powered analysis of oil, gas, and renewable energy markets delivered straight to your Telegram.
 
-📅 *What you'll receive:*
-• Daily market summaries
-• AI-powered price predictions  
-• Geopolitical analysis
-• Supply/demand insights
-• Risk assessments
+⚡ *Your Daily Intelligence Package:*
+• 📊 Real-time market data (WTI Crude, Brent, Natural Gas)
+• 🧠 AI analysis with probabilistic price predictions
+• 📰 Breaking news with direct source links
+• 📈 Risk assessments and trading insights
+• 🌍 Geopolitical impact analysis
 
-🕒 *Delivery Schedule:*
-• Morning briefings (8 AM EST)
-• Evening updates (6 PM EST)
-• Breaking news alerts
+⏰ *Schedule:* Daily briefing at 9:00 AM UTC
 
-⚙️ *Commands:*
-/status - Check your subscription status
-/help - Get help and support
-/unsubscribe - Stop receiving updates
+💡 *Available Commands:*
+/status - Check subscription status
+/help - Full help menu
+/unsubscribe - Stop updates
+
+🚀 *Your first market analysis will arrive tomorrow morning!*
 
 Get ready for professional-grade energy market intelligence! 🚀
 
@@ -216,13 +215,13 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
       console.log(`New user started bot: @${username}, chat_id: ${chatId}`);
       
     } else if (text?.startsWith('/status')) {
-      await bot!.sendMessage(chatId, 'Your subscription is active! 🟢\n\nYou will receive daily energy market insights.', {
+      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 9:00 AM UTC.', {
         parse_mode: 'Markdown'
       });
       
     } else if (text?.startsWith('/help')) {
       const helpMessage = `
-🆘 *Energy Insights AI Help*
+🆘 *Energy Pulse AI Help*
 
 *Commands:*
 /start - Start receiving insights
@@ -234,7 +233,7 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
 For technical support, visit [tcheevy.com](https://tcheevy.com)
 
 *About:*
-Energy Insights AI provides professional-grade market analysis using advanced AI and real-time data sources.
+Energy Pulse AI provides professional-grade energy market intelligence using advanced AI, real-time data from Yahoo Finance, and breaking news from premium sources.
       `.trim();
       
       await bot!.sendMessage(chatId, helpMessage, {
@@ -243,7 +242,7 @@ Energy Insights AI provides professional-grade market analysis using advanced AI
       });
       
     } else if (text?.startsWith('/unsubscribe')) {
-      await bot!.sendMessage(chatId, '❌ You have been unsubscribed from Energy Insights AI.\n\nSend /start to resubscribe anytime.');
+      await bot!.sendMessage(chatId, '❌ You have been unsubscribed from Energy Pulse AI.\n\nSend /start to resubscribe and receive daily energy market intelligence anytime.');
       
     } else {
       // Handle other messages

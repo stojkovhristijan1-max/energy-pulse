@@ -14,8 +14,9 @@ export async function POST(request: NextRequest) {
     
     // Handle Telegram webhook updates
     if (body.update_id) {
+      console.log('Received Telegram update:', JSON.stringify(body, null, 2));
       await handleTelegramUpdate(body);
-      return NextResponse.json({ success: true });
+      return new NextResponse('OK', { status: 200 });
     }
 
     // Handle manual operations
