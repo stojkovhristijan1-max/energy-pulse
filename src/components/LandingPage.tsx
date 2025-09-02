@@ -208,7 +208,7 @@ export function LandingPage() {
           <div className="absolute top-2/3 right-1/3 w-1.5 h-1.5 bg-green-400 rounded-full opacity-40 animate-ping" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
           <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-blue-400 rounded-full opacity-50 animate-ping" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
 
-          {/* Beautiful Description Quadrants */}
+          {/* Beautiful Description Quadrants with Center Button */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-4xl mx-auto relative z-10">
             {/* Top Left Quadrant */}
             <div className="relative group">
@@ -235,6 +235,19 @@ export function LandingPage() {
                 <p className="text-gray-300 leading-relaxed">
                   Live market data from Yahoo Finance for WTI Crude, Brent, Natural Gas, and major energy stocks updated every 2 minutes.
                 </p>
+              </div>
+            </div>
+
+            {/* Center Button - Positioned absolutely in the middle */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="relative inline-block group pointer-events-auto">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300 scale-110"></div>
+                <button
+                  onClick={() => setShowSignup(true)}
+                  className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-8 py-3 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20"
+                >
+                  Connect to Bot
+                </button>
               </div>
             </div>
 
@@ -267,18 +280,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Centered Call-to-Action Button */}
-          <div className="flex justify-center items-center mt-12">
-            <div className="relative inline-block group">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300 scale-110"></div>
-              <button
-                onClick={() => setShowSignup(true)}
-                className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-12 py-4 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20"
-              >
-                Connect to Telegram Bot
-              </button>
-            </div>
-          </div>
+
 
 
 
