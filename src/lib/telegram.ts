@@ -9,6 +9,9 @@ if (typeof window === 'undefined' && process.env.TELEGRAM_BOT_TOKEN) {
   bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 }
 
+// Simple storage for bot subscribers (in production, use Redis or database)
+let subscribers = new Set<string>();
+
 export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void> {
   if (!bot) {
     console.error('Telegram bot not initialized');
@@ -16,37 +19,23 @@ export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void
   }
 
   try {
-    const users = await getActiveUsers();
-    console.log(`Sending insights to ${users.length} users`);
-
+    console.log(`Sending insights to ${subscribers.size} subscribers`);
     const message = formatAnalysisForTelegram(analysis);
 
-    // Send to all users with error handling
-    const sendPromises = users.map(async (user) => {
+    // Send to all subscribers
+    const sendPromises = Array.from(subscribers).map(async (chatId) => {
       try {
-        if (!user.telegram_chat_id) {
-          console.warn(`User ${user.email} has no telegram_chat_id`);
-          return;
-        }
-
-        await bot!.sendMessage(user.telegram_chat_id, message, {
+        await bot!.sendMessage(chatId, message, {
           parse_mode: 'Markdown',
           disable_web_page_preview: true
         });
-
-        // Track successful delivery
-        await trackNotification(user.id, analysis.id, 'sent');
-        console.log(`✅ Sent to ${user.telegram_username}`);
+        console.log(`✅ Sent to chat ${chatId}`);
       } catch (error) {
-        console.error(`❌ Failed to send to ${user.telegram_username}:`, error);
-        
-        // Track failed delivery
-        await trackNotification(
-          user.id, 
-          analysis.id, 
-          'failed', 
-          error instanceof Error ? error.message : 'Unknown error'
-        );
+        console.error(`❌ Failed to send to chat ${chatId}:`, error);
+        // Remove invalid chat IDs
+        if (error instanceof Error && error.message.includes('chat not found')) {
+          subscribers.delete(chatId);
+        }
       }
     });
 
@@ -208,27 +197,18 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
 
   try {
     if (text?.startsWith('/start')) {
-      const startParam = text.split(' ')[1]; // Get verification code from /start PARAM
+      // Add user to subscribers
+      subscribers.add(chatId);
       
-      if (startParam) {
-        // User came from website with verification code
-        const linkResult = await linkUserByVerificationCode(startParam, chatId, username);
-        if (linkResult.success) {
-          await bot!.sendMessage(chatId, `🎉 *Account Linked Successfully!*\n\nHello ${linkResult.email}!\n\nYou're now connected to Energy Pulse AI and will receive daily market insights at 9:00 AM UTC.\n\n🚀 Your first analysis is coming soon!`, {
-            parse_mode: 'Markdown'
-          });
-        } else {
-          await bot!.sendMessage(chatId, '❌ Invalid or expired verification code. Please sign up again on the website.');
-        }
-      } else {
-        // Regular start without verification code
-        await sendWelcomeMessage(chatId, username);
-      }
+      await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\nYou're now subscribed to daily AI-powered energy market analysis! 🚀\n\n⚡ *What you'll receive:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n⏰ *Daily briefing at 12:00 PM CEST (10:00 AM UTC)*\n\n🚀 Your first analysis is coming soon!\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      });
       
-      console.log(`New user started bot: @${username}, chat_id: ${chatId}`);
+      console.log(`✅ New subscriber: @${username}, chat_id: ${chatId}, total subscribers: ${subscribers.size}`);
       
     } else if (text?.startsWith('/status')) {
-      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 9:00 AM UTC.', {
+      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 12:00 PM CEST (10:00 AM UTC).', {
         parse_mode: 'Markdown'
       });
       

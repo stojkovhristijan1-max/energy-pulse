@@ -242,12 +242,14 @@ export function LandingPage() {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
               <div className="relative inline-block group pointer-events-auto">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-green-500 rounded-2xl blur-lg opacity-60 group-hover:opacity-80 transition-opacity duration-300 scale-110"></div>
-                <button
-                  onClick={() => setShowSignup(true)}
-                  className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-8 py-3 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20 shadow-2xl"
+                <a
+                  href="https://t.me/energypulsebot"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-black text-xl px-8 py-3 rounded-2xl font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/25 border border-emerald-400/20 shadow-2xl inline-block"
                 >
                   Connect to Bot
-                </button>
+                </a>
               </div>
             </div>
 
