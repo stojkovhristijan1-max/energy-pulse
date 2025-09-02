@@ -301,6 +301,61 @@ export async function trackNotification(
   }
 }
 
+// Telegram subscriber management
+export async function getTelegramSubscribers(): Promise<string[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('telegram_subscribers')
+      .select('chat_id')
+      .eq('is_active', true);
+
+    if (error) {
+      console.error('Error getting telegram subscribers:', error);
+      return [];
+    }
+
+    return data.map(sub => sub.chat_id);
+  } catch (error) {
+    console.error('Error in getTelegramSubscribers:', error);
+    return [];
+  }
+}
+
+export async function addSubscriber(chatId: string, username: string): Promise<void> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('telegram_subscribers')
+      .upsert({ 
+        chat_id: chatId, 
+        username: username,
+        is_active: true 
+      }, { 
+        onConflict: 'chat_id' 
+      });
+
+    if (error) {
+      console.error('Error adding subscriber:', error);
+    }
+  } catch (error) {
+    console.error('Error in addSubscriber:', error);
+  }
+}
+
+export async function removeSubscriber(chatId: string): Promise<void> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('telegram_subscribers')
+      .update({ is_active: false })
+      .eq('chat_id', chatId);
+
+    if (error) {
+      console.error('Error removing subscriber:', error);
+    }
+  } catch (error) {
+    console.error('Error in removeSubscriber:', error);
+  }
+}
+
 
 
 

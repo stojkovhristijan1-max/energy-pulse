@@ -59,6 +59,16 @@ CREATE TABLE user_notifications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Telegram subscribers table (simple storage for bot subscribers)
+CREATE TABLE telegram_subscribers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  chat_id TEXT UNIQUE NOT NULL,
+  username TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_telegram_username ON users(telegram_username);
@@ -69,6 +79,8 @@ CREATE INDEX idx_market_data_timestamp ON market_data(timestamp DESC);
 CREATE INDEX idx_news_articles_published_date ON news_articles(published_date DESC);
 CREATE INDEX idx_user_notifications_user_id ON user_notifications(user_id);
 CREATE INDEX idx_user_notifications_status ON user_notifications(delivery_status);
+CREATE INDEX idx_telegram_subscribers_chat_id ON telegram_subscribers(chat_id);
+CREATE INDEX idx_telegram_subscribers_active ON telegram_subscribers(is_active);
 
 -- Row Level Security (RLS) policies
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;

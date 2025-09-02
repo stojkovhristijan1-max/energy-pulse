@@ -1,6 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { AnalysisResult, User } from '@/types';
-import { getActiveUsers, updateUserTelegramChatId, trackNotification, linkUserTelegramByCode } from './supabase';
+import { getActiveUsers, updateUserTelegramChatId, trackNotification, linkUserTelegramByCode, getTelegramSubscribers, addSubscriber, removeSubscriber } from './supabase';
 
 // Initialize bot (only on server side)
 let bot: TelegramBot | null = null;
@@ -9,9 +9,6 @@ if (typeof window === 'undefined' && process.env.TELEGRAM_BOT_TOKEN) {
   bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 }
 
-// Simple storage for bot subscribers (in production, use Redis or database)
-let subscribers = new Set<string>();
-
 export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void> {
   if (!bot) {
     console.error('Telegram bot not initialized');
@@ -19,11 +16,14 @@ export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void
   }
 
   try {
-    console.log(`Sending insights to ${subscribers.size} subscribers`);
+    // Get all subscribers from database
+    const subscribers = await getTelegramSubscribers();
+    console.log(`Sending insights to ${subscribers.length} subscribers`);
+
     const message = formatAnalysisForTelegram(analysis);
 
     // Send to all subscribers
-    const sendPromises = Array.from(subscribers).map(async (chatId) => {
+    const sendPromises = subscribers.map(async (chatId) => {
       try {
         await bot!.sendMessage(chatId, message, {
           parse_mode: 'Markdown',
@@ -32,9 +32,9 @@ export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void
         console.log(`✅ Sent to chat ${chatId}`);
       } catch (error) {
         console.error(`❌ Failed to send to chat ${chatId}:`, error);
-        // Remove invalid chat IDs
+        // Remove invalid chat IDs from database
         if (error instanceof Error && error.message.includes('chat not found')) {
-          subscribers.delete(chatId);
+          await removeSubscriber(chatId);
         }
       }
     });
@@ -197,15 +197,15 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
 
   try {
     if (text?.startsWith('/start')) {
-      // Add user to subscribers
-      subscribers.add(chatId);
+      // Add user to database subscribers
+      await addSubscriber(chatId, username);
       
       await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\nYou're now subscribed to daily AI-powered energy market analysis! 🚀\n\n⚡ *What you'll receive:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n⏰ *Daily briefing at 12:00 PM CEST (10:00 AM UTC)*\n\n🚀 Your first analysis is coming soon!\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true
       });
       
-      console.log(`✅ New subscriber: @${username}, chat_id: ${chatId}, total subscribers: ${subscribers.size}`);
+      console.log(`✅ New subscriber: @${username}, chat_id: ${chatId}`);
       
     } else if (text?.startsWith('/status')) {
       await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 12:00 PM CEST (10:00 AM UTC).', {
