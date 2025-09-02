@@ -196,10 +196,10 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
   const text = message.text;
 
   try {
+    // Auto-subscribe ANY user who sends ANY message (not just /start)
+    await addSubscriber(chatId, username);
+    
     if (text?.startsWith('/start')) {
-      // Add user to database subscribers
-      await addSubscriber(chatId, username);
-      
       await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\nYou're now subscribed to daily AI-powered energy market analysis! 🚀\n\n⚡ *What you'll receive:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n⏰ *Daily briefing at 22:30 CEST (20:30 UTC)*\n\n🚀 Your first analysis is coming soon!\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true
@@ -235,11 +235,19 @@ Energy Pulse AI provides professional-grade energy market intelligence using adv
       });
       
     } else if (text?.startsWith('/unsubscribe')) {
-      await bot!.sendMessage(chatId, '❌ You have been unsubscribed from Energy Pulse AI.\n\nSend /start to resubscribe and receive daily energy market intelligence anytime.');
+      await removeSubscriber(chatId);
+      await bot!.sendMessage(chatId, '❌ *You have been unsubscribed from Energy Pulse AI.*\n\nSend any message to resubscribe and receive daily energy market intelligence anytime!', {
+        parse_mode: 'Markdown'
+      });
       
     } else {
-      // Handle other messages
-      await bot!.sendMessage(chatId, 'Thanks for your message! Use /help to see available commands.');
+      // Any other message - auto-subscribe and send welcome
+      await bot!.sendMessage(chatId, `👋 *Hello @${username}!*\n\nYou're now automatically subscribed to Energy Pulse AI! 🚀\n\n📊 You'll receive daily energy market analysis at *22:30 CEST*\n\n💡 *Commands:*\n/status - Check subscription\n/help - More info\n/unsubscribe - Stop updates\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true
+      });
+      
+      console.log(`✅ Auto-subscribed: @${username}, chat_id: ${chatId}`);
     }
   } catch (error) {
     console.error('Error handling Telegram update:', error);
