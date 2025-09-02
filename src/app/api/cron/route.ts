@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // For manual triggers, check auth
     if (!isVercelCron) {
       const authHeader = request.headers.get('authorization');
-      const expectedAuth = `Bearer ${process.env.NEXTAUTH_SECRET}`;
+      const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
       
       if (authHeader !== expectedAuth) {
         return NextResponse.json(
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     const { action, auth_token } = body;
 
     // Simple auth for manual triggers
-    if (auth_token !== process.env.NEXTAUTH_SECRET) {
+    if (auth_token !== process.env.CRON_SECRET) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' } as ApiResponse,
         { status: 401 }

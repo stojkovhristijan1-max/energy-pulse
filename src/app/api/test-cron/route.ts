@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const secret = searchParams.get('secret');
     
     // Simple secret check
-    if (secret !== process.env.NEXTAUTH_SECRET) {
+    if (secret !== process.env.CRON_SECRET) {
       return NextResponse.json(
         { success: false, error: 'Invalid secret' } as ApiResponse,
         { status: 401 }
