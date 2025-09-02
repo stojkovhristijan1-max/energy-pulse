@@ -108,7 +108,7 @@ You've successfully connected to the most advanced energy market intelligence pl
 • 📈 Risk assessments and trading insights
 • 🌍 Geopolitical impact analysis
 
-⏰ *Schedule:* Daily briefing at 20:10 UTC (22:10 CEST)
+⏰ *Schedule:* Daily briefing at 20:30 UTC (22:30 CEST)
 
 💡 *Available Commands:*
 /status - Check subscription status
@@ -200,7 +200,7 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
       // Add user to database subscribers
       await addSubscriber(chatId, username);
       
-      await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\nYou're now subscribed to daily AI-powered energy market analysis! 🚀\n\n⚡ *What you'll receive:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n⏰ *Daily briefing at 22:10 CEST (20:10 UTC)*\n\n🚀 Your first analysis is coming soon!\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
+      await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\nYou're now subscribed to daily AI-powered energy market analysis! 🚀\n\n⚡ *What you'll receive:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n⏰ *Daily briefing at 22:30 CEST (20:30 UTC)*\n\n🚀 Your first analysis is coming soon!\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true
       });
@@ -208,7 +208,7 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
       console.log(`✅ New subscriber: @${username}, chat_id: ${chatId}`);
       
     } else if (text?.startsWith('/status')) {
-      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 22:10 CEST (20:10 UTC).', {
+      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 22:30 CEST (20:30 UTC).', {
         parse_mode: 'Markdown'
       });
       
