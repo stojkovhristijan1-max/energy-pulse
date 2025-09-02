@@ -1,0 +1,5 @@
+[33mfaff72f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m FINAL: Set schedule to 22:10 CEST and deploy all fixes
+[33m93fed70[m CRITICAL FIX: Use database for persistent subscriber storage
+[33m05f450d[m Deploy simplified bot connection
+[33me9cdce4[m Implement automatic Telegram verification system - users can now sign up and get automatically linked!
+[33m4930de5[m Fix authentication: use CRON_SECRET instead of NEXTAUTH_SECRET
