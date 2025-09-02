@@ -9,18 +9,26 @@ import { ApiResponse } from '@/types';
 // This endpoint will be called by Vercel Cron Jobs or external schedulers
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const expectedAuth = `Bearer ${process.env.NEXTAUTH_SECRET}`;
+    // Check if request is from Vercel Cron (they don't send auth headers)
+    const userAgent = request.headers.get('user-agent');
+    const isVercelCron = userAgent?.includes('vercel-cron') || 
+                        request.headers.get('x-vercel-cron') === '1';
     
-    // Simple auth check for cron jobs (in production, use more robust auth)
-    if (authHeader !== expectedAuth) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' } as ApiResponse,
-        { status: 401 }
-      );
+    // For manual triggers, check auth
+    if (!isVercelCron) {
+      const authHeader = request.headers.get('authorization');
+      const expectedAuth = `Bearer ${process.env.NEXTAUTH_SECRET}`;
+      
+      if (authHeader !== expectedAuth) {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized' } as ApiResponse,
+          { status: 401 }
+        );
+      }
     }
 
     console.log('🚀 Starting automated energy analysis...');
+    console.log('Request source:', isVercelCron ? 'Vercel Cron' : 'Manual trigger');
     const startTime = Date.now();
 
     // 1. Search for latest energy news
