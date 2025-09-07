@@ -89,7 +89,7 @@ ANALYSIS GUIDELINES:
 
     const response = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-8b-instant',
       temperature: 0.3,
       max_tokens: 2500,
       response_format: { type: 'json_object' }
@@ -182,7 +182,7 @@ Keep each point concise but informative.
 
     const response = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-8b-instant',
       temperature: 0.2,
       max_tokens: 800
     });
@@ -218,7 +218,7 @@ Respond in JSON format:
 
     const response = await groq.chat.completions.create({
       messages: [{ role: 'user', content: prompt }],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-8b-instant',
       temperature: 0.2,
       max_tokens: 500,
       response_format: { type: 'json_object' }
@@ -244,7 +244,7 @@ export async function validateGroqApiKey(): Promise<boolean> {
   try {
     const response = await groq.chat.completions.create({
       messages: [{ role: 'user', content: 'Test message' }],
-      model: 'mixtral-8x7b-32768',
+      model: 'llama-3.1-8b-instant',
       max_tokens: 10
     });
 
