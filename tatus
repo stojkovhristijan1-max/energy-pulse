@@ -3,3 +3,6 @@
 [33m05f450d[m Deploy simplified bot connection
 [33me9cdce4[m Implement automatic Telegram verification system - users can now sign up and get automatically linked!
 [33m4930de5[m Fix authentication: use CRON_SECRET instead of NEXTAUTH_SECRET
+[33m6cd8845[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Remove market tickers from landing page and freeze in separate component
+[33m776f7e8[m Fix Yahoo Finance fallback - use realistic prices for analysis
+[33m4ed1d0b[m Remove cron auth check
