@@ -16,7 +16,8 @@ import {
   Wind,
   Sun,
   Battery,
-  Fuel
+  Fuel,
+  Activity
 } from 'lucide-react';
 
 export function LandingPage() {
