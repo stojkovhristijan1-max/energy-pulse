@@ -39,7 +39,16 @@ GROQ_API_KEY=your_groq_api_key
 TAVILY_API_KEY=your_tavily_api_key
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 NEXTAUTH_SECRET=your_nextauth_secret
+CRON_SECRET=your_cron_secret_for_manual_triggers
+ADMIN_TELEGRAM_CHAT_ID=your_personal_chat_id_for_alerts (optional)
 ```
+
+### Getting Your Admin Chat ID (Optional)
+To receive system alerts when APIs fail:
+1. Start a chat with @userinfobot on Telegram
+2. Send any message  
+3. Copy your chat ID number
+4. Add it as `ADMIN_TELEGRAM_CHAT_ID` in Vercel
 
 5. Click **Deploy**
 

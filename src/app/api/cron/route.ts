@@ -3,9 +3,10 @@ import { getMarketMovingNews } from '@/lib/tavily';
 import { fetchEnergyData } from '@/lib/yahoo-finance';
 import { analyzeEnergyMarket } from '@/lib/groq';
 import { sendEnergyInsights } from '@/lib/telegram';
-import { storeAnalysis, storeMarketData, storeNewsArticles } from '@/lib/supabase';
+import { storeAnalysis, storeMarketData, storeNewsArticles, getTelegramSubscribers } from '@/lib/supabase';
 import { ApiResponse } from '@/types';
 import { CircuitBreaker } from '@/lib/circuit-breaker';
+import { systemMonitor } from '@/lib/monitoring';
 
 // This endpoint will be called by Vercel Cron Jobs or external schedulers
 export async function GET(request: NextRequest) {
@@ -20,6 +21,10 @@ export async function GET(request: NextRequest) {
     console.log('🚀 Starting automated energy analysis...');
     const startTime = Date.now();
 
+    // Get subscriber count for monitoring
+    const subscribers = await getTelegramSubscribers();
+    console.log(`👥 Found ${subscribers.length} active subscribers`);
+
     // Initialize circuit breakers
     const newsCircuit = new CircuitBreaker('news-api', 2, 300000); // 5 min reset
     const marketCircuit = new CircuitBreaker('market-api', 2, 300000);
@@ -31,8 +36,10 @@ export async function GET(request: NextRequest) {
     try {
       newsResults = await newsCircuit.execute(() => getMarketMovingNews());
       console.log(`✅ Found ${newsResults.length} relevant news articles`);
+      systemMonitor.recordNewsApiStatus('healthy');
     } catch (error) {
       console.log(`⚠️ News API failed (circuit: ${newsCircuit.getState()}):`, error instanceof Error ? error.message : error);
+      systemMonitor.recordNewsApiStatus('failed');
       // Continue with empty news array
     }
 
@@ -42,8 +49,10 @@ export async function GET(request: NextRequest) {
     try {
       marketData = await marketCircuit.execute(() => fetchEnergyData());
       console.log(`✅ Retrieved data for ${marketData.length} energy symbols`);
+      systemMonitor.recordMarketApiStatus('healthy');
     } catch (error) {
       console.log(`⚠️ Market API failed (circuit: ${marketCircuit.getState()}):`, error instanceof Error ? error.message : error);
+      systemMonitor.recordMarketApiStatus('failed');
       // Continue with empty market data
     }
 
@@ -53,8 +62,17 @@ export async function GET(request: NextRequest) {
     try {
       analysis = await aiCircuit.execute(() => analyzeEnergyMarket(newsResults, marketData));
       console.log('✅ AI analysis completed successfully');
+      systemMonitor.recordAiApiStatus('healthy');
+      
+      // Check if this is actually a fallback analysis
+      if (analysis.reasoning.includes('temporarily unavailable') || analysis.reasoning.includes('technical issues')) {
+        systemMonitor.recordAnalysisQuality('fallback', analysis.reasoning);
+      } else {
+        systemMonitor.recordAnalysisQuality('full');
+      }
     } catch (error) {
       console.log(`⚠️ AI analysis failed (circuit: ${aiCircuit.getState()}):`, error instanceof Error ? error.message : error);
+      systemMonitor.recordAiApiStatus('failed');
       
       // Force a basic fallback analysis
       analysis = {
@@ -71,6 +89,7 @@ export async function GET(request: NextRequest) {
         },
         reasoning: 'Analysis systems are experiencing technical difficulties. Normal service will resume shortly.'
       };
+      systemMonitor.recordAnalysisQuality('fallback', 'Complete AI system failure');
     }
 
     // 4. Store in database
@@ -111,16 +130,26 @@ export async function GET(request: NextRequest) {
         ...analysis
       };
 
+    let messagesSent = 0;
     try {
       await sendEnergyInsights(finalAnalysis);
+      messagesSent = subscribers.length;
       console.log('✅ Insights sent to Telegram subscribers');
     } catch (telegramError) {
       console.error('❌ Failed to send Telegram insights:', telegramError);
+      messagesSent = 0;
       // Continue execution even if Telegram fails
     }
 
     const executionTime = Date.now() - startTime;
     console.log(`🎉 Analysis completed successfully in ${executionTime}ms`);
+
+    // Record final monitoring data
+    systemMonitor.recordExecutionTime(executionTime);
+    systemMonitor.recordDelivery(subscribers.length, messagesSent);
+
+    // Check system health and send alerts if needed
+    await systemMonitor.checkHealthAndAlert();
 
     return NextResponse.json({
       success: true,

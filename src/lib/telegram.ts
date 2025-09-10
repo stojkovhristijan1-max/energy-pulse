@@ -164,6 +164,24 @@ Powered by [tcheevy.com](https://tcheevy.com)
   }
 }
 
+// Send message to specific chat (for admin alerts)
+export async function sendTelegramMessage(chatId: string, message: string): Promise<boolean> {
+  if (!bot) {
+    console.error('Telegram bot not initialized');
+    return false;
+  }
+
+  try {
+    await bot.sendMessage(chatId, message, {
+      parse_mode: 'Markdown'
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending Telegram message:', error);
+    return false;
+  }
+}
+
 // Set up bot commands and handlers
 export async function setupTelegramBot(): Promise<void> {
   if (!bot) {
