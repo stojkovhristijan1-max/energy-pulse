@@ -1,37 +1,43 @@
 import { TavilySearchResponse, NewsResult } from '@/types';
+import { retryWithBackoff } from './retry';
 
 const TAVILY_API_URL = 'https://api.tavily.com/search';
 
 export async function searchEnergyNews(query: string): Promise<NewsResult[]> {
   try {
-    const response = await fetch(TAVILY_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        api_key: process.env.TAVILY_API_KEY,
-        query: `${query} energy market news today`,
-        search_depth: 'advanced',
-        include_answer: true,
-        max_results: 10,
-        include_domains: [
-          'bloomberg.com',
-          'reuters.com',
-          'wsj.com',
-          'ft.com',
-          'cnbc.com',
-          'marketwatch.com',
-          'oilprice.com',
-          'energyvoice.com'
-        ],
-        exclude_domains: [
-          'reddit.com',
-          'twitter.com',
-          'facebook.com'
-        ]
+    const response = await retryWithBackoff(
+      async () => await fetch(TAVILY_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          api_key: process.env.TAVILY_API_KEY,
+          query: `${query} energy market news today`,
+          search_depth: 'advanced',
+          include_answer: true,
+          max_results: 10,
+          include_domains: [
+            'bloomberg.com',
+            'reuters.com',
+            'wsj.com',
+            'ft.com',
+            'cnbc.com',
+            'marketwatch.com',
+            'oilprice.com',
+            'energyvoice.com'
+          ],
+          exclude_domains: [
+            'reddit.com',
+            'twitter.com',
+            'facebook.com'
+          ]
+        }),
       }),
-    });
+      3,
+      2000,
+      'Tavily News Search'
+    );
 
     if (!response.ok) {
       throw new Error(`Tavily API error: ${response.status} ${response.statusText}`);

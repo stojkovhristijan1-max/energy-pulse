@@ -1,5 +1,6 @@
 import Groq from 'groq-sdk';
 import { AnalysisResult, NewsResult, MarketData, MarketPrediction } from '@/types';
+import { retryWithBackoff } from './retry';
 
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
@@ -87,13 +88,18 @@ ANALYSIS GUIDELINES:
 - Factor in correlation between different energy sectors
 `;
 
-    const response = await groq.chat.completions.create({
-      messages: [{ role: 'user', content: prompt }],
-      model: 'llama-3.1-8b-instant',
-      temperature: 0.3,
-      max_tokens: 2500,
-      response_format: { type: 'json_object' }
-    });
+    const response = await retryWithBackoff(
+      async () => await groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.3,
+        max_tokens: 2500,
+        response_format: { type: 'json_object' }
+      }),
+      3,
+      1000,
+      'Groq AI Analysis'
+    );
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
@@ -124,38 +130,79 @@ ANALYSIS GUIDELINES:
   } catch (error) {
     console.error('Error analyzing energy market:', error);
     
-    // Fallback analysis if API fails
+    // Enhanced fallback analysis with basic market insights
+    console.log('🔄 Using enhanced fallback analysis with available data...');
+    
+    // Try to provide basic insights from available data
+    const hasNews = newsData && newsData.length > 0;
+    const hasMarketData = marketData && marketData.length > 0;
+    
+    const fallbackSummary = [];
+    
+    if (hasNews) {
+      // Use actual news headlines for better fallback
+      fallbackSummary.push(
+        ...newsData.slice(0, 3).map(article => ({
+          text: `${article.title.substring(0, 150)}...`,
+          source_url: article.url
+        }))
+      );
+    }
+    
+    // Add market context if available
+    if (hasMarketData) {
+      const oilData = marketData.find(d => d.symbol?.includes('CL=F') || d.symbol?.includes('BZ=F'));
+      const gasData = marketData.find(d => d.symbol?.includes('NG=F'));
+      
+      if (oilData) {
+        fallbackSummary.push({
+          text: `Oil prices currently at $${oilData.price?.toFixed(2)} with ${oilData.change_percent > 0 ? 'gains' : 'losses'} of ${Math.abs(oilData.change_percent).toFixed(2)}%`,
+          source_url: 'https://finance.yahoo.com'
+        });
+      }
+      
+      if (gasData) {
+        fallbackSummary.push({
+          text: `Natural gas trading at $${gasData.price?.toFixed(2)} showing ${gasData.change_percent > 0 ? 'upward' : 'downward'} momentum`,
+          source_url: 'https://finance.yahoo.com'
+        });
+      }
+    }
+    
+    // Ensure we have at least some content
+    if (fallbackSummary.length === 0) {
+      fallbackSummary.push(
+        { text: 'Energy markets showing mixed signals amid ongoing volatility', source_url: 'https://energy-pulse.vercel.app' },
+        { text: 'Oil and gas prices continue to respond to global supply-demand dynamics', source_url: 'https://energy-pulse.vercel.app' },
+        { text: 'Geopolitical factors remain key drivers of energy market sentiment', source_url: 'https://energy-pulse.vercel.app' }
+      );
+    }
+
     return {
-      summary: [
-        { text: 'Market analysis temporarily unavailable due to technical issues', source_url: 'https://energy-pulse.vercel.app' },
-        { text: 'Please check back later for updated insights', source_url: 'https://energy-pulse.vercel.app' },
-        { text: 'Current market conditions require careful monitoring', source_url: 'https://energy-pulse.vercel.app' },
-        { text: 'Energy sector showing mixed signals', source_url: 'https://energy-pulse.vercel.app' },
-        { text: 'Recommend staying informed on key developments', source_url: 'https://energy-pulse.vercel.app' }
-      ],
+      summary: fallbackSummary.slice(0, 5), // Limit to 5 items
       predictions: {
         crude_oil: {
           direction: 'SIDEWAYS',
-          confidence: 50,
-          reasoning: 'Analysis temporarily unavailable'
+          confidence: 60,
+          reasoning: 'AI analysis temporarily unavailable. Market showing mixed signals with ongoing volatility.'
         },
         natural_gas: {
-          direction: 'SIDEWAYS',
-          confidence: 50,
-          reasoning: 'Analysis temporarily unavailable'
+          direction: 'SIDEWAYS', 
+          confidence: 60,
+          reasoning: 'AI analysis temporarily unavailable. Supply-demand dynamics remain in focus.'
         },
         energy_stocks: {
           direction: 'SIDEWAYS',
-          confidence: 50,
-          reasoning: 'Analysis temporarily unavailable'
+          confidence: 55,
+          reasoning: 'AI analysis temporarily unavailable. Sector performance tied to commodity price movements.'
         },
         utilities: {
           direction: 'SIDEWAYS',
-          confidence: 50,
-          reasoning: 'Analysis temporarily unavailable'
+          confidence: 65,
+          reasoning: 'AI analysis temporarily unavailable. Utility sector typically shows stability during uncertainty.'
         }
       },
-      reasoning: 'Market analysis is temporarily unavailable due to technical issues. Please check back later for comprehensive insights into energy market conditions and predictions.'
+      reasoning: `Market analysis is temporarily unavailable due to technical issues. However, based on available data: ${hasNews ? `${newsData.length} news articles` : 'limited news'} and ${hasMarketData ? `${marketData.length} market data points` : 'basic market data'} suggest continued monitoring of energy sector developments. Full AI analysis will resume shortly.`
     };
   }
 }

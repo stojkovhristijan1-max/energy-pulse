@@ -5,6 +5,7 @@ import { analyzeEnergyMarket } from '@/lib/groq';
 import { sendEnergyInsights } from '@/lib/telegram';
 import { storeAnalysis, storeMarketData, storeNewsArticles } from '@/lib/supabase';
 import { ApiResponse } from '@/types';
+import { CircuitBreaker } from '@/lib/circuit-breaker';
 
 // This endpoint will be called by Vercel Cron Jobs or external schedulers
 export async function GET(request: NextRequest) {
@@ -19,29 +20,58 @@ export async function GET(request: NextRequest) {
     console.log('🚀 Starting automated energy analysis...');
     const startTime = Date.now();
 
-    // 1. Search for latest energy news
+    // Initialize circuit breakers
+    const newsCircuit = new CircuitBreaker('news-api', 2, 300000); // 5 min reset
+    const marketCircuit = new CircuitBreaker('market-api', 2, 300000);
+    const aiCircuit = new CircuitBreaker('ai-analysis', 2, 600000); // 10 min reset
+
+    // 1. Search for latest energy news with circuit breaker
     console.log('📰 Fetching energy news...');
-    const newsResults = await getMarketMovingNews();
-    console.log(`✅ Found ${newsResults.length} relevant news articles`);
-
-    // 2. Fetch current market data
-    console.log('📊 Fetching market data...');
-    const marketData = await fetchEnergyData();
-    console.log(`✅ Retrieved data for ${marketData.length} energy symbols`);
-
-    // Early exit if no data
-    if (newsResults.length === 0 && marketData.length === 0) {
-      console.log('⚠️  No data available for analysis');
-      return NextResponse.json(
-        { success: false, error: 'No data available for analysis' } as ApiResponse,
-        { status: 500 }
-      );
+    let newsResults: any[] = [];
+    try {
+      newsResults = await newsCircuit.execute(() => getMarketMovingNews());
+      console.log(`✅ Found ${newsResults.length} relevant news articles`);
+    } catch (error) {
+      console.log(`⚠️ News API failed (circuit: ${newsCircuit.getState()}):`, error instanceof Error ? error.message : error);
+      // Continue with empty news array
     }
 
-    // 3. Analyze with AI
+    // 2. Fetch current market data with circuit breaker
+    console.log('📊 Fetching market data...');
+    let marketData: any[] = [];
+    try {
+      marketData = await marketCircuit.execute(() => fetchEnergyData());
+      console.log(`✅ Retrieved data for ${marketData.length} energy symbols`);
+    } catch (error) {
+      console.log(`⚠️ Market API failed (circuit: ${marketCircuit.getState()}):`, error instanceof Error ? error.message : error);
+      // Continue with empty market data
+    }
+
+    // 3. Analyze with AI (always proceed, even with limited data)
     console.log('🤖 Analyzing with AI...');
-    const analysis = await analyzeEnergyMarket(newsResults, marketData);
-    console.log('✅ AI analysis completed');
+    let analysis;
+    try {
+      analysis = await aiCircuit.execute(() => analyzeEnergyMarket(newsResults, marketData));
+      console.log('✅ AI analysis completed successfully');
+    } catch (error) {
+      console.log(`⚠️ AI analysis failed (circuit: ${aiCircuit.getState()}):`, error instanceof Error ? error.message : error);
+      
+      // Force a basic fallback analysis
+      analysis = {
+        summary: [
+          { text: 'Energy market analysis experiencing technical difficulties', source_url: 'https://energy-pulse.vercel.app' },
+          { text: 'Market monitoring continues with basic data feeds', source_url: 'https://energy-pulse.vercel.app' },
+          { text: 'Full analysis capabilities will resume shortly', source_url: 'https://energy-pulse.vercel.app' }
+        ],
+        predictions: {
+          crude_oil: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' },
+          natural_gas: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' },
+          energy_stocks: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' },
+          utilities: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' }
+        },
+        reasoning: 'Analysis systems are experiencing technical difficulties. Normal service will resume shortly.'
+      };
+    }
 
     // 4. Store in database
     console.log('💾 Storing analysis results...');
