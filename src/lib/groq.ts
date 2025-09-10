@@ -182,22 +182,22 @@ ANALYSIS GUIDELINES:
       summary: fallbackSummary.slice(0, 5), // Limit to 5 items
       predictions: {
         crude_oil: {
-          direction: 'SIDEWAYS',
+          direction: 'SIDEWAYS' as const,
           confidence: 60,
           reasoning: 'AI analysis temporarily unavailable. Market showing mixed signals with ongoing volatility.'
         },
         natural_gas: {
-          direction: 'SIDEWAYS', 
+          direction: 'SIDEWAYS' as const, 
           confidence: 60,
           reasoning: 'AI analysis temporarily unavailable. Supply-demand dynamics remain in focus.'
         },
         energy_stocks: {
-          direction: 'SIDEWAYS',
+          direction: 'SIDEWAYS' as const,
           confidence: 55,
           reasoning: 'AI analysis temporarily unavailable. Sector performance tied to commodity price movements.'
         },
         utilities: {
-          direction: 'SIDEWAYS',
+          direction: 'SIDEWAYS' as const,
           confidence: 65,
           reasoning: 'AI analysis temporarily unavailable. Utility sector typically shows stability during uncertainty.'
         }

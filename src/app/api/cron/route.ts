@@ -82,10 +82,10 @@ export async function GET(request: NextRequest) {
           { text: 'Full analysis capabilities will resume shortly', source_url: 'https://energy-pulse.vercel.app' }
         ],
         predictions: {
-          crude_oil: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' },
-          natural_gas: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' },
-          energy_stocks: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' },
-          utilities: { direction: 'SIDEWAYS', confidence: 50, reasoning: 'Technical analysis unavailable' }
+          crude_oil: { direction: 'SIDEWAYS' as const, confidence: 50, reasoning: 'Technical analysis unavailable' },
+          natural_gas: { direction: 'SIDEWAYS' as const, confidence: 50, reasoning: 'Technical analysis unavailable' },
+          energy_stocks: { direction: 'SIDEWAYS' as const, confidence: 50, reasoning: 'Technical analysis unavailable' },
+          utilities: { direction: 'SIDEWAYS' as const, confidence: 50, reasoning: 'Technical analysis unavailable' }
         },
         reasoning: 'Analysis systems are experiencing technical difficulties. Normal service will resume shortly.'
       };
