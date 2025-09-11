@@ -58,6 +58,18 @@ Before running this application, you need:
    GROQ_API_KEY=your_groq_key
    TELEGRAM_BOT_TOKEN=your_bot_token
 
+   # WhatsApp Configuration (Choose ONE option)
+   
+   # Option 1: Meta WhatsApp Business API (RECOMMENDED - Free for first 1000 conversations)
+   META_WHATSAPP_TOKEN=your_meta_access_token
+   META_PHONE_NUMBER_ID=your_phone_number_id
+   META_WEBHOOK_VERIFY_TOKEN=your_webhook_verify_token
+   
+   # Option 2: Twilio WhatsApp API (Fallback - has sandbox limitations)
+   # TWILIO_ACCOUNT_SID=your_twilio_account_sid
+   # TWILIO_AUTH_TOKEN=your_twilio_auth_token
+   # TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
    # NextAuth Configuration
    NEXTAUTH_SECRET=your_secret
    NEXTAUTH_URL=http://localhost:3000

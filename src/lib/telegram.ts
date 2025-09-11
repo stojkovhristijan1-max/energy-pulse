@@ -95,29 +95,24 @@ export async function sendWelcomeMessage(chatId: string, username: string): Prom
 
   try {
     const welcomeMessage = `
-🎉 *Welcome to Energy Pulse AI!*
+🎉 *Welcome to Energy Pulse AI, @${username}!*
 
-Hello @${username}!
+✅ *You're now subscribed!* No further action needed.
 
-You've successfully connected to the most advanced energy market intelligence platform. Get daily AI-powered analysis of oil, gas, and renewable energy markets delivered straight to your Telegram.
+📊 *What you'll receive daily at 20:30 UTC:*
+• AI analysis of energy markets (oil, gas, renewables)
+• Latest energy news summaries with source links
+• Basic price movement predictions
+• Market insights and key developments
 
-⚡ *Your Daily Intelligence Package:*
-• 📊 Real-time market data (WTI Crude, Brent, Natural Gas)
-• 🧠 AI analysis with probabilistic price predictions
-• 📰 Breaking news with direct source links
-• 📈 Risk assessments and trading insights
-• 🌍 Geopolitical impact analysis
-
-⏰ *Schedule:* Daily briefing at 20:30 UTC (22:30 CEST)
-
-💡 *Available Commands:*
+💡 *Commands:*
 /status - Check subscription status
-/help - Full help menu
-/unsubscribe - Stop updates
+/help - Show help menu
+/unsubscribe - Stop receiving updates
 
-🚀 *Your first market analysis will arrive tomorrow morning!*
+⚠️ *Important:* This is automated AI analysis, not professional financial advice. Always do your own research before making investment decisions.
 
-Get ready for professional-grade energy market intelligence! 🚀
+🚀 *Your first analysis will arrive at the next scheduled time (20:30 UTC)!*
 
 ---
 Powered by [tcheevy.com](https://tcheevy.com)
@@ -214,19 +209,16 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
   const text = message.text;
 
   try {
-    // Auto-subscribe ANY user who sends ANY message (not just /start)
+    // Auto-subscribe ANY user who sends ANY message (including /start)
     await addSubscriber(chatId, username);
     
     if (text?.startsWith('/start')) {
-      await bot!.sendMessage(chatId, `🎉 *Welcome to Energy Pulse AI!*\n\nHello @${username}!\n\n✅ *You're automatically subscribed!* No further action needed.\n\n⚡ *What you'll receive daily at 22:30 CEST:*\n• 📊 Real-time market data analysis\n• 🧠 AI predictions for oil, gas & energy stocks\n• 📰 Breaking news with source links\n• 📈 Trading insights and risk assessments\n\n🚀 *You're all set! Just wait for your daily analysis.*\n\n💡 *Optional Commands:*\n/status - Check subscription\n/help - More info\n/unsubscribe - Stop updates\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true
-      });
-      
+      // Send welcome message and auto-subscribe
+      await sendWelcomeMessage(chatId, username);
       console.log(`✅ New subscriber: @${username}, chat_id: ${chatId}`);
       
     } else if (text?.startsWith('/status')) {
-      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily AI-powered energy market analysis at 22:30 CEST (20:30 UTC).', {
+      await bot!.sendMessage(chatId, '✅ *Your Energy Pulse AI subscription is active!*\n\nYou will receive daily energy market analysis at 20:30 UTC.', {
         parse_mode: 'Markdown'
       });
       
@@ -234,17 +226,25 @@ export async function handleTelegramUpdate(update: any): Promise<void> {
       const helpMessage = `
 🆘 *Energy Pulse AI Help*
 
+*How it works:*
+• Send any message = automatically subscribed
+• Receive daily analysis at 20:30 UTC
+• No further action needed
+
 *Commands:*
-/start - Start receiving insights
 /status - Check subscription status  
 /help - Show this help message
 /unsubscribe - Stop updates
 
+*What you get daily:*
+• AI analysis of energy markets (oil, gas, renewables)
+• News summaries with source links
+• Basic price predictions (not financial advice)
+
 *Support:*
 For technical support, visit [tcheevy.com](https://tcheevy.com)
 
-*About:*
-Energy Pulse AI provides professional-grade energy market intelligence using advanced AI, real-time data from Yahoo Finance, and breaking news from premium sources.
+⚠️ *Disclaimer:* This is automated analysis, not professional investment advice.
       `.trim();
       
       await bot!.sendMessage(chatId, helpMessage, {
@@ -254,18 +254,18 @@ Energy Pulse AI provides professional-grade energy market intelligence using adv
       
     } else if (text?.startsWith('/unsubscribe')) {
       await removeSubscriber(chatId);
-      await bot!.sendMessage(chatId, '❌ *You have been unsubscribed from Energy Pulse AI.*\n\nSend any message to resubscribe and receive daily energy market intelligence anytime!', {
+      await bot!.sendMessage(chatId, '❌ *You have been unsubscribed from Energy Pulse AI.*\n\nSend any message to resubscribe anytime!', {
         parse_mode: 'Markdown'
       });
       
     } else {
-      // Any other message - auto-subscribe and send welcome
-      await bot!.sendMessage(chatId, `👋 *Hello @${username}!*\n\n🎉 *Perfect! You're now subscribed to Energy Pulse AI!* 🚀\n\n📊 You'll automatically receive daily energy market analysis at *22:30 CEST* - no further action needed!\n\n💡 *Optional Commands:*\n/status - Check subscription\n/help - More info\n/unsubscribe - Stop updates\n\n✅ *You're all set! Just wait for your daily analysis.*\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
+      // Any other message - they're already subscribed, just acknowledge
+      await bot!.sendMessage(chatId, `👋 *Hi @${username}!*\n\n✅ You're subscribed to Energy Pulse AI.\n\nYou'll receive daily energy market analysis at 20:30 UTC.\n\nUse /help for more info or /unsubscribe to stop.\n\n---\nPowered by [tcheevy.com](https://tcheevy.com)`, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true
       });
       
-      console.log(`✅ Auto-subscribed: @${username}, chat_id: ${chatId}`);
+      console.log(`💬 Acknowledged message from subscriber @${username}, chat_id: ${chatId}`);
     }
   } catch (error) {
     console.error('Error handling Telegram update:', error);

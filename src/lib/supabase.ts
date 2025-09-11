@@ -356,6 +356,61 @@ export async function removeSubscriber(chatId: string): Promise<void> {
   }
 }
 
+// WhatsApp subscriber management
+export async function getWhatsAppSubscribers(): Promise<string[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('whatsapp_subscribers')
+      .select('phone_number')
+      .eq('is_active', true);
+
+    if (error) {
+      console.error('Error getting WhatsApp subscribers:', error);
+      return [];
+    }
+
+    return data.map(sub => sub.phone_number);
+  } catch (error) {
+    console.error('Error in getWhatsAppSubscribers:', error);
+    return [];
+  }
+}
+
+export async function addWhatsAppSubscriber(phoneNumber: string, displayName?: string): Promise<void> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('whatsapp_subscribers')
+      .upsert({ 
+        phone_number: phoneNumber, 
+        display_name: displayName,
+        is_active: true 
+      }, { 
+        onConflict: 'phone_number' 
+      });
+
+    if (error) {
+      console.error('Error adding WhatsApp subscriber:', error);
+    }
+  } catch (error) {
+    console.error('Error in addWhatsAppSubscriber:', error);
+  }
+}
+
+export async function removeWhatsAppSubscriber(phoneNumber: string): Promise<void> {
+  try {
+    const { error } = await supabaseAdmin
+      .from('whatsapp_subscribers')
+      .update({ is_active: false })
+      .eq('phone_number', phoneNumber);
+
+    if (error) {
+      console.error('Error removing WhatsApp subscriber:', error);
+    }
+  } catch (error) {
+    console.error('Error in removeWhatsAppSubscriber:', error);
+  }
+}
+
 
 
 

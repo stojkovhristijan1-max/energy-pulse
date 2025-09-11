@@ -3,7 +3,8 @@ import { getMarketMovingNews } from '@/lib/tavily';
 import { fetchEnergyData } from '@/lib/yahoo-finance';
 import { analyzeEnergyMarket } from '@/lib/groq';
 import { sendEnergyInsights } from '@/lib/telegram';
-import { storeAnalysis, storeMarketData, storeNewsArticles, getTelegramSubscribers } from '@/lib/supabase';
+import { sendEnergyInsightsWhatsApp } from '@/lib/whatsapp';
+import { storeAnalysis, storeMarketData, storeNewsArticles, getTelegramSubscribers, getWhatsAppSubscribers } from '@/lib/supabase';
 import { ApiResponse } from '@/types';
 import { CircuitBreaker } from '@/lib/circuit-breaker';
 import { systemMonitor } from '@/lib/monitoring';
@@ -21,9 +22,10 @@ export async function GET(request: NextRequest) {
     console.log('🚀 Starting automated energy analysis...');
     const startTime = Date.now();
 
-    // Get subscriber count for monitoring
-    const subscribers = await getTelegramSubscribers();
-    console.log(`👥 Found ${subscribers.length} active subscribers`);
+    // Get subscriber counts for monitoring
+    const telegramSubscribers = await getTelegramSubscribers();
+    const whatsappSubscribers = await getWhatsAppSubscribers();
+    console.log(`👥 Found ${telegramSubscribers.length} Telegram subscribers and ${whatsappSubscribers.length} WhatsApp subscribers`);
 
     // Initialize circuit breakers
     const newsCircuit = new CircuitBreaker('news-api', 2, 300000); // 5 min reset
@@ -119,8 +121,8 @@ export async function GET(request: NextRequest) {
       console.error('❌ Failed to store market data:', marketStored.status === 'rejected' ? marketStored.reason : 'Unknown error');
     }
 
-    // 5. Send to Telegram subscribers
-    console.log('📱 Sending insights to Telegram subscribers...');
+    // 5. Send to both Telegram and WhatsApp subscribers (in parallel)
+    console.log('📱 Sending insights to all subscribers...');
     
     const finalAnalysis = analysisStored.status === 'fulfilled' && analysisStored.value ? 
       analysisStored.value : 
@@ -130,23 +132,39 @@ export async function GET(request: NextRequest) {
         ...analysis
       };
 
-    let messagesSent = 0;
-    try {
-      await sendEnergyInsights(finalAnalysis);
-      messagesSent = subscribers.length;
-      console.log('✅ Insights sent to Telegram subscribers');
-    } catch (telegramError) {
-      console.error('❌ Failed to send Telegram insights:', telegramError);
-      messagesSent = 0;
-      // Continue execution even if Telegram fails
-    }
+    let telegramSent = 0;
+    let whatsappSent = 0;
+
+    // Send to both platforms in parallel for maximum efficiency
+    const [telegramResult, whatsappResult] = await Promise.allSettled([
+      sendEnergyInsights(finalAnalysis).then(() => {
+        telegramSent = telegramSubscribers.length;
+        console.log('✅ Insights sent to Telegram subscribers');
+        return true;
+      }).catch((error) => {
+        console.error('❌ Failed to send Telegram insights:', error);
+        return false;
+      }),
+      
+      sendEnergyInsightsWhatsApp(finalAnalysis).then(() => {
+        whatsappSent = whatsappSubscribers.length;
+        console.log('✅ Insights sent to WhatsApp subscribers');
+        return true;
+      }).catch((error) => {
+        console.error('❌ Failed to send WhatsApp insights:', error);
+        return false;
+      })
+    ]);
+
+    const totalMessagesSent = telegramSent + whatsappSent;
+    const totalSubscribers = telegramSubscribers.length + whatsappSubscribers.length;
 
     const executionTime = Date.now() - startTime;
     console.log(`🎉 Analysis completed successfully in ${executionTime}ms`);
 
     // Record final monitoring data
     systemMonitor.recordExecutionTime(executionTime);
-    systemMonitor.recordDelivery(subscribers.length, messagesSent);
+    systemMonitor.recordDelivery(totalSubscribers, totalMessagesSent);
 
     // Check system health and send alerts if needed
     await systemMonitor.checkHealthAndAlert();
@@ -160,7 +178,13 @@ export async function GET(request: NextRequest) {
           news_articles: newsResults.length,
           market_symbols: marketData.length,
           predictions_generated: Object.keys(analysis.predictions).length,
-          telegram_delivery: 'attempted'
+          telegram_subscribers: telegramSubscribers.length,
+          whatsapp_subscribers: whatsappSubscribers.length,
+          total_messages_sent: totalMessagesSent,
+          delivery_status: {
+            telegram: telegramResult.status === 'fulfilled' ? 'success' : 'failed',
+            whatsapp: whatsappResult.status === 'fulfilled' ? 'success' : 'failed'
+          }
         },
         analysis: {
           summary: analysis.summary,

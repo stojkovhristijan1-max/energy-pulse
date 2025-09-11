@@ -6,3 +6,13 @@
 [33m6cd8845[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Remove market tickers from landing page and freeze in separate component
 [33m776f7e8[m Fix Yahoo Finance fallback - use realistic prices for analysis
 [33m4ed1d0b[m Remove cron auth check
+[33m1fb3f8b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Fix TypeScript errors: use proper const assertions for direction types
+[33m1c7d5d9[m Complete bulletproof system: monitoring, health checks, admin alerts, circuit breakers
+[33m34d5dbe[m Add bulletproof error handling: retry logic, circuit breakers, enhanced fallbacks
+[33m293e1e7[m Fix Groq API: update to supported model llama-3.1-8b-instant
+[33m68c95a8[m Fix build errors: add Activity import and remove test-cron endpoint
+[33m4666fcb[m Remove market tickers from landing page
+[33m345b68b[m Force redeploy
+[33m6cd8845[m Remove market tickers from landing page and freeze in separate component
+[33m776f7e8[m Fix Yahoo Finance fallback - use realistic prices for analysis
+[33m4ed1d0b[m Remove cron auth check
