@@ -46,6 +46,58 @@ export async function sendEnergyInsights(analysis: AnalysisResult, newsData?: Ne
   }
 }
 
+// Helper function to ensure news source diversity
+function diversifyNewsSources(newsData: NewsResult[], maxArticles: number): NewsResult[] {
+  const sourceGroups: { [domain: string]: NewsResult[] } = {};
+  
+  // Group articles by domain
+  newsData.forEach(article => {
+    try {
+      const domain = new URL(article.url).hostname.replace('www.', '');
+      if (!sourceGroups[domain]) {
+        sourceGroups[domain] = [];
+      }
+      sourceGroups[domain].push(article);
+    } catch (error) {
+      // If URL parsing fails, skip this article
+      console.warn('Failed to parse URL:', article.url);
+    }
+  });
+  
+  const diversifiedArticles: NewsResult[] = [];
+  const maxPerSource = 2; // Maximum articles per source
+  
+  // First pass: Take 1 article from each source
+  Object.values(sourceGroups).forEach(articles => {
+    if (articles.length > 0 && diversifiedArticles.length < maxArticles) {
+      diversifiedArticles.push(articles[0]);
+    }
+  });
+  
+  // Second pass: Fill remaining slots with up to 2 per source
+  Object.values(sourceGroups).forEach(articles => {
+    for (let i = 1; i < Math.min(articles.length, maxPerSource) && diversifiedArticles.length < maxArticles; i++) {
+      diversifiedArticles.push(articles[i]);
+    }
+  });
+  
+  // Sort by score and date to maintain quality
+  return diversifiedArticles
+    .sort((a, b) => {
+      const scoreA = a.score || 0;
+      const scoreB = b.score || 0;
+      const dateA = new Date(a.published_date).getTime();
+      const dateB = new Date(b.published_date).getTime();
+      
+      // Combine score and recency
+      const weightA = scoreA * 0.7 + (dateA / 1000000000) * 0.3;
+      const weightB = scoreB * 0.7 + (dateB / 1000000000) * 0.3;
+      
+      return weightB - weightA;
+    })
+    .slice(0, maxArticles);
+}
+
 export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: NewsResult[]): string {
   const date = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
@@ -60,11 +112,15 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
 📊 *Market Summary:*
 ${analysis.summary.map((point: any) => `• ${point.text}\n  📰 [Source](${point.source_url})`).join('\n\n')}`;
 
-  // Add more news headlines if available
+  // Add more news headlines if available with source diversity
   if (newsData && newsData.length > 0) {
-    const additionalNews = newsData.slice(0, 8).map((article, index) => {
+    // Ensure source diversity by grouping by domain and selecting max 2 per source
+    const diversifiedNews = diversifyNewsSources(newsData, 10);
+    
+    const additionalNews = diversifiedNews.map((article, index) => {
       const publishDate = new Date(article.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      return `${index + 1}. *${article.title}*\n   📅 ${publishDate} | 📰 [Read More](${article.url})`;
+      const domain = new URL(article.url).hostname.replace('www.', '');
+      return `${index + 1}. *${article.title}*\n   📅 ${publishDate} | 📰 [${domain}](${article.url})`;
     }).join('\n\n');
 
     message += `

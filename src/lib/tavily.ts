@@ -25,7 +25,19 @@ export async function searchEnergyNews(query: string): Promise<NewsResult[]> {
             'cnbc.com',
             'marketwatch.com',
             'oilprice.com',
-            'energyvoice.com'
+            'energyvoice.com',
+            'rigzone.com',
+            'petroleumeconomist.com',
+            'naturalgasintel.com',
+            'energycentral.com',
+            'platts.com',
+            'argusmedia.com',
+            'upstreamonline.com',
+            'offshore-energy.biz',
+            'renewableenergyworld.com',
+            'pv-magazine.com',
+            'windpowerengineering.com',
+            'hydroworld.com'
           ],
           exclude_domains: [
             'reddit.com',
