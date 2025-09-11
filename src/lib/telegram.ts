@@ -1,5 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { AnalysisResult, User } from '@/types';
+import { AnalysisResult, User, NewsResult } from '@/types';
 import { getActiveUsers, updateUserTelegramChatId, trackNotification, linkUserTelegramByCode, getTelegramSubscribers, addSubscriber, removeSubscriber } from './supabase';
 
 // Initialize bot (only on server side)
@@ -9,7 +9,7 @@ if (typeof window === 'undefined' && process.env.TELEGRAM_BOT_TOKEN) {
   bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 }
 
-export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void> {
+export async function sendEnergyInsights(analysis: AnalysisResult, newsData?: NewsResult[]): Promise<void> {
   if (!bot) {
     console.error('Telegram bot not initialized');
     return;
@@ -20,7 +20,7 @@ export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void
     const subscribers = await getTelegramSubscribers();
     console.log(`Sending insights to ${subscribers.length} subscribers`);
 
-    const message = formatAnalysisForTelegram(analysis);
+    const message = formatAnalysisForTelegram(analysis, newsData);
 
     // Send to all subscribers
     const sendPromises = subscribers.map(async (chatId) => {
@@ -46,7 +46,7 @@ export async function sendEnergyInsights(analysis: AnalysisResult): Promise<void
   }
 }
 
-export function formatAnalysisForTelegram(analysis: AnalysisResult): string {
+export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: NewsResult[]): string {
   const date = new Date().toLocaleDateString('en-US', { 
     weekday: 'long', 
     year: 'numeric', 
@@ -54,11 +54,26 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult): string {
     day: 'numeric' 
   });
 
-  return `
+  let message = `
 🔥 *Energy Insights AI - ${date}*
 
 📊 *Market Summary:*
-${analysis.summary.map((point: any) => `• ${point.text}\n  📰 [Source](${point.source_url})`).join('\n\n')}
+${analysis.summary.map((point: any) => `• ${point.text}\n  📰 [Source](${point.source_url})`).join('\n\n')}`;
+
+  // Add more news headlines if available
+  if (newsData && newsData.length > 0) {
+    const additionalNews = newsData.slice(0, 8).map((article, index) => {
+      const publishDate = new Date(article.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return `${index + 1}. *${article.title}*\n   📅 ${publishDate} | 📰 [Read More](${article.url})`;
+    }).join('\n\n');
+
+    message += `
+
+📰 *Latest Energy News Headlines:*
+${additionalNews}`;
+  }
+
+  message += `
 
 📈 *Probabilistic Outcomes (Next 1-7 Days):*
 
@@ -83,8 +98,9 @@ ${analysis.reasoning}
 
 ---
 ⚡ Powered by [tcheevy.com](https://tcheevy.com)
-💡 _This is not financial advice. Trade at your own risk._
-  `.trim();
+💡 _This is not financial advice. Trade at your own risk._`;
+
+  return message.trim();
 }
 
 export async function sendWelcomeMessage(chatId: string, username: string): Promise<boolean> {

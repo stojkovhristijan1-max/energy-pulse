@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
 
     // Send to both platforms in parallel for maximum efficiency
     const [telegramResult, whatsappResult] = await Promise.allSettled([
-      sendEnergyInsights(finalAnalysis).then(() => {
+      sendEnergyInsights(finalAnalysis, newsResults).then(() => {
         telegramSent = telegramSubscribers.length;
         console.log('✅ Insights sent to Telegram subscribers');
         return true;
