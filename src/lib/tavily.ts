@@ -16,7 +16,7 @@ export async function searchEnergyNews(query: string): Promise<NewsResult[]> {
           query: `${query} energy market news today`,
           search_depth: 'advanced',
           include_answer: true,
-          max_results: 10,
+          max_results: 5,
           include_domains: [
             // Traditional Financial & Energy News
             'bloomberg.com',
@@ -128,25 +128,13 @@ export async function searchSpecificEnergyTopics(): Promise<{
 export async function getMarketMovingNews(): Promise<NewsResult[]> {
   try {
     const queries = [
-      // Traditional Energy
-      'OPEC production cuts oil prices',
-      'Federal Reserve interest rates energy sector',
-      'oil gas inventory report EIA',
-      'energy company earnings results',
-      
-      // Renewable Energy & Clean Tech
-      'solar energy policy subsidies IRA inflation reduction act',
-      'wind power offshore onshore capacity installations',
-      'electric vehicles EV charging infrastructure Tesla',
-      'energy storage battery technology grid scale',
-      'renewable energy policy government climate',
-      'green hydrogen production investment projects',
-      'carbon credits ESG energy transition',
-      'nuclear power SMR small modular reactors',
-      
-      // Energy Infrastructure & Grid
-      'energy infrastructure pipeline refinery transmission grid',
-      'smart grid renewable integration utilities'
+      // Optimized for 10-second execution - 6 high-impact queries
+      'OPEC oil prices energy market news',
+      'renewable energy solar wind policy news',
+      'electric vehicles EV battery storage news',
+      'natural gas energy infrastructure news',
+      'energy company earnings climate transition',
+      'Federal Reserve energy sector interest rates'
     ];
 
     const searchPromises = queries.map(query => 
@@ -178,7 +166,7 @@ export async function getMarketMovingNews(): Promise<NewsResult[]> {
         
         return weightB - weightA;
       })
-      .slice(0, 15); // Top 15 most relevant and recent
+      .slice(0, 10); // Top 10 most relevant and recent (optimized for free tier)
   } catch (error) {
     console.error('Error getting market moving news:', error);
     throw new Error(`Failed to get market moving news: ${error instanceof Error ? error.message : 'Unknown error'}`);

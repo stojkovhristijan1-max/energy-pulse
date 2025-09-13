@@ -1,57 +1,33 @@
 import yahooFinance from 'yahoo-finance2';
 import { MarketData } from '@/types';
 
-// Energy sector symbols to track
+// Energy sector symbols to track (optimized for 10-second execution)
 export const ENERGY_SYMBOLS = {
-  // Commodities
+  // Essential Commodities
   CRUDE_OIL_WTI: 'CL=F',
   CRUDE_OIL_BRENT: 'BZ=F', 
   NATURAL_GAS: 'NG=F',
-  HEATING_OIL: 'HO=F',
-  GASOLINE: 'RB=F',
   
-  // Energy ETFs
+  // Key Energy ETFs
   ENERGY_SELECT_SECTOR: 'XLE',
-  OIL_SERVICES: 'OIH',
-  ENERGY_INFRASTRUCTURE: 'ENFR',
-  
-  // Major Energy Companies
-  EXXON_MOBIL: 'XOM',
-  CHEVRON: 'CVX',
-  CONOCOPHILLIPS: 'COP',
-  SHELL: 'SHEL',
-  BP: 'BP',
-  TOTAL_ENERGIES: 'TTE',
-  
-  // Renewables & Clean Tech
-  NEXTERA_ENERGY: 'NEE',
-  FIRST_SOLAR: 'FSLR',
-  ENPHASE_ENERGY: 'ENPH',
-  TESLA: 'TSLA', // For energy storage/solar
-  SUNPOWER: 'SPWR',
-  CANADIAN_SOLAR: 'CSIQ',
-  JINKO_SOLAR: 'JKS',
-  VESTAS_WIND: 'VWDRY',
-  ORSTED: 'ORSTED.CO',
-  BROOKFIELD_RENEWABLE: 'BEP',
-  
-  // Clean Energy ETFs
   CLEAN_ENERGY_ETF: 'ICLN',
   SOLAR_ETF: 'TAN',
-  WIND_ENERGY_ETF: 'FAN',
-  GLOBAL_CLEAN_ENERGY: 'PBD',
   
-  // Battery & Energy Storage
-  ALBEMARLE: 'ALB', // Lithium
-  LIVENT: 'LTHM', // Lithium
+  // Major Traditional Energy
+  EXXON_MOBIL: 'XOM',
+  CHEVRON: 'CVX',
+  
+  // Leading Renewables
+  NEXTERA_ENERGY: 'NEE',
+  FIRST_SOLAR: 'FSLR',
+  TESLA: 'TSLA', // Energy storage/solar
+  
+  // Clean Tech Leaders
+  ENPHASE_ENERGY: 'ENPH',
   PLUG_POWER: 'PLUG', // Hydrogen
-  BALLARD_POWER: 'BLDP', // Fuel cells
-  QUANTUMSCAPE: 'QS', // Battery tech
   
-  // Pipeline & Infrastructure
-  KINDER_MORGAN: 'KMI',
-  ENTERPRISE_PRODUCTS: 'EPD',
-  ENBRIDGE: 'ENB'
+  // Infrastructure
+  KINDER_MORGAN: 'KMI'
 };
 
 export async function fetchEnergyData(): Promise<MarketData[]> {
