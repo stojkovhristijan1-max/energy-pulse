@@ -204,8 +204,8 @@ export async function getEnergyStockPrices(): Promise<MarketData[]> {
       ENERGY_SYMBOLS.ENERGY_SELECT_SECTOR,
       ENERGY_SYMBOLS.EXXON_MOBIL,
       ENERGY_SYMBOLS.CHEVRON,
-      ENERGY_SYMBOLS.CONOCOPHILLIPS,
-      ENERGY_SYMBOLS.NEXTERA_ENERGY
+      ENERGY_SYMBOLS.NEXTERA_ENERGY,
+      ENERGY_SYMBOLS.FIRST_SOLAR
     ];
 
     const stockData: MarketData[] = [];
@@ -239,8 +239,8 @@ export async function getMarketSummary(): Promise<{
     const allData = await fetchEnergyData();
     
     const commodities = allData.filter(d => d.symbol.endsWith('=F'));
-    const etfs = allData.filter(d => ['XLE', 'OIH', 'ENFR'].includes(d.symbol));
-    const stocks = allData.filter(d => !d.symbol.endsWith('=F') && !['XLE', 'OIH', 'ENFR'].includes(d.symbol));
+    const etfs = allData.filter(d => ['XLE', 'ICLN', 'TAN'].includes(d.symbol));
+    const stocks = allData.filter(d => !d.symbol.endsWith('=F') && !['XLE', 'ICLN', 'TAN'].includes(d.symbol));
     
     const gainers = allData.filter(d => d.change_percent > 0).length;
     const losers = allData.filter(d => d.change_percent < 0).length;
