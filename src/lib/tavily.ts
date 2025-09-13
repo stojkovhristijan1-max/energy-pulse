@@ -18,6 +18,7 @@ export async function searchEnergyNews(query: string): Promise<NewsResult[]> {
           include_answer: true,
           max_results: 10,
           include_domains: [
+            // Traditional Financial & Energy News
             'bloomberg.com',
             'reuters.com',
             'wsj.com',
@@ -34,10 +35,29 @@ export async function searchEnergyNews(query: string): Promise<NewsResult[]> {
             'argusmedia.com',
             'upstreamonline.com',
             'offshore-energy.biz',
+            
+            // Renewable Energy Focused Sources
             'renewableenergyworld.com',
             'pv-magazine.com',
             'windpowerengineering.com',
-            'hydroworld.com'
+            'hydroworld.com',
+            'greentechmedia.com',
+            'renewablesnow.com',
+            'cleantechnica.com',
+            'energystoragereport.info',
+            'solarquotes.com.au',
+            'windpowermonthly.com',
+            'rechargenews.com',
+            'pvtech.org',
+            'energy-storage.news',
+            'smart-energy.com',
+            'renewableenergyhub.com',
+            'solarindustrymag.com',
+            'evannex.com',
+            'electrek.co',
+            'utilitydive.com',
+            'greenbiz.com',
+            'environmentalleader.com'
           ],
           exclude_domains: [
             'reddit.com',
@@ -78,20 +98,26 @@ export async function searchSpecificEnergyTopics(): Promise<{
   gasNews: NewsResult[];
   renewableNews: NewsResult[];
   geopoliticalNews: NewsResult[];
+  cleanTechNews: NewsResult[];
+  utilityNews: NewsResult[];
 }> {
   try {
-    const [oilNews, gasNews, renewableNews, geopoliticalNews] = await Promise.allSettled([
-      searchEnergyNews('crude oil WTI Brent price'),
-      searchEnergyNews('natural gas price Henry Hub'),
-      searchEnergyNews('renewable energy solar wind'),
-      searchEnergyNews('energy geopolitics OPEC Russia Ukraine')
+    const [oilNews, gasNews, renewableNews, geopoliticalNews, cleanTechNews, utilityNews] = await Promise.allSettled([
+      searchEnergyNews('crude oil WTI Brent price production'),
+      searchEnergyNews('natural gas price Henry Hub LNG'),
+      searchEnergyNews('solar wind renewable energy capacity installations'),
+      searchEnergyNews('energy geopolitics OPEC Russia Ukraine sanctions'),
+      searchEnergyNews('electric vehicles battery storage green hydrogen'),
+      searchEnergyNews('utility companies grid modernization smart energy')
     ]);
 
     return {
       oilNews: oilNews.status === 'fulfilled' ? oilNews.value : [],
       gasNews: gasNews.status === 'fulfilled' ? gasNews.value : [],
       renewableNews: renewableNews.status === 'fulfilled' ? renewableNews.value : [],
-      geopoliticalNews: geopoliticalNews.status === 'fulfilled' ? geopoliticalNews.value : []
+      geopoliticalNews: geopoliticalNews.status === 'fulfilled' ? geopoliticalNews.value : [],
+      cleanTechNews: cleanTechNews.status === 'fulfilled' ? cleanTechNews.value : [],
+      utilityNews: utilityNews.status === 'fulfilled' ? utilityNews.value : []
     };
   } catch (error) {
     console.error('Error searching specific energy topics:', error);
@@ -102,12 +128,25 @@ export async function searchSpecificEnergyTopics(): Promise<{
 export async function getMarketMovingNews(): Promise<NewsResult[]> {
   try {
     const queries = [
+      // Traditional Energy
       'OPEC production cuts oil prices',
       'Federal Reserve interest rates energy sector',
-      'energy infrastructure pipeline refinery',
       'oil gas inventory report EIA',
       'energy company earnings results',
-      'renewable energy policy government'
+      
+      // Renewable Energy & Clean Tech
+      'solar energy policy subsidies IRA inflation reduction act',
+      'wind power offshore onshore capacity installations',
+      'electric vehicles EV charging infrastructure Tesla',
+      'energy storage battery technology grid scale',
+      'renewable energy policy government climate',
+      'green hydrogen production investment projects',
+      'carbon credits ESG energy transition',
+      'nuclear power SMR small modular reactors',
+      
+      // Energy Infrastructure & Grid
+      'energy infrastructure pipeline refinery transmission grid',
+      'smart grid renewable integration utilities'
     ];
 
     const searchPromises = queries.map(query => 

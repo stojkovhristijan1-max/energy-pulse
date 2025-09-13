@@ -23,11 +23,30 @@ export const ENERGY_SYMBOLS = {
   BP: 'BP',
   TOTAL_ENERGIES: 'TTE',
   
-  // Renewables & Utilities
+  // Renewables & Clean Tech
   NEXTERA_ENERGY: 'NEE',
   FIRST_SOLAR: 'FSLR',
   ENPHASE_ENERGY: 'ENPH',
   TESLA: 'TSLA', // For energy storage/solar
+  SUNPOWER: 'SPWR',
+  CANADIAN_SOLAR: 'CSIQ',
+  JINKO_SOLAR: 'JKS',
+  VESTAS_WIND: 'VWDRY',
+  ORSTED: 'ORSTED.CO',
+  BROOKFIELD_RENEWABLE: 'BEP',
+  
+  // Clean Energy ETFs
+  CLEAN_ENERGY_ETF: 'ICLN',
+  SOLAR_ETF: 'TAN',
+  WIND_ENERGY_ETF: 'FAN',
+  GLOBAL_CLEAN_ENERGY: 'PBD',
+  
+  // Battery & Energy Storage
+  ALBEMARLE: 'ALB', // Lithium
+  LIVENT: 'LTHM', // Lithium
+  PLUG_POWER: 'PLUG', // Hydrogen
+  BALLARD_POWER: 'BLDP', // Fuel cells
+  QUANTUMSCAPE: 'QS', // Battery tech
   
   // Pipeline & Infrastructure
   KINDER_MORGAN: 'KMI',
