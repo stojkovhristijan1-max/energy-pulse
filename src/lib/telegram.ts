@@ -262,31 +262,15 @@ function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
 function create3SentenceSummary(article: NewsResult): string {
   if (!article.content || article.content.length < 50) {
     // Fallback: create summary from title
-    return `${article.title}. This development could impact energy markets. More details are expected to emerge.`;
+    return `${article.title}. Market impact expected. Details emerging.`;
   }
 
-  // Split content into sentences
-  const sentences = article.content
-    .replace(/([.!?])\s+/g, '$1|SPLIT|')
-    .split('|SPLIT|')
-    .map(s => s.trim())
-    .filter(s => s.length > 10);
-
-  if (sentences.length >= 3) {
-    // Take first 3 sentences and ensure they're not too long
-    const summary = sentences.slice(0, 3)
-      .map(s => s.length > 120 ? s.substring(0, 117) + '...' : s)
-      .join(' ');
-    
-    return summary.length > 300 ? summary.substring(0, 297) + '...' : summary;
-  } else if (sentences.length === 2) {
-    // Use 2 sentences and add context
-    return `${sentences[0]} ${sentences[1]} This could have significant implications for the energy sector.`;
-  } else {
-    // Single sentence or short content
-    const mainSentence = sentences[0] || article.content.substring(0, 150);
-    return `${mainSentence} This development is being closely watched by energy market analysts. Further updates are expected.`;
-  }
+  // Simple approach: take first 200 chars, add context
+  const firstPart = article.content.substring(0, 150).trim();
+  const lastDot = firstPart.lastIndexOf('.');
+  const summary = lastDot > 50 ? firstPart.substring(0, lastDot + 1) : firstPart + '.';
+  
+  return `${summary} This could impact energy markets. Analysts are monitoring developments.`;
 }
 
 function prioritizeNewsources(articles: NewsResult[]): NewsResult[] {
