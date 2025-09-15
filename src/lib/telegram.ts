@@ -198,9 +198,9 @@ function formatRenewablePredictions(analysis: AnalysisResult): string {
   const predictions = [];
   
   // Focus on renewable-friendly predictions
-  predictions.push(`🔋 *Clean Energy Stocks:* ${analysis.predictions.energy_stocks.direction === 'BULLISH' ? '🚀 RISING' : analysis.predictions.energy_stocks.direction === 'BEARISH' ? '📉 FALLING' : '➡️ STABLE'} (${analysis.predictions.energy_stocks.confidence}%)`);
+  predictions.push(`🔋 *Clean Energy Stocks:* ${analysis.predictions.energy_stocks.direction === 'UP' ? '🚀 RISING' : analysis.predictions.energy_stocks.direction === 'DOWN' ? '📉 FALLING' : '➡️ STABLE'} (${analysis.predictions.energy_stocks.confidence}%)`);
   
-  predictions.push(`⚡ *Utilities Transition:* ${analysis.predictions.utilities.direction === 'BULLISH' ? '🌱 GROWING' : analysis.predictions.utilities.direction === 'BEARISH' ? '📉 DECLINING' : '⚖️ MIXED'} (${analysis.predictions.utilities.confidence}%)`);
+  predictions.push(`⚡ *Utilities Transition:* ${analysis.predictions.utilities.direction === 'UP' ? '🌱 GROWING' : analysis.predictions.utilities.direction === 'DOWN' ? '📉 DECLINING' : '⚖️ MIXED'} (${analysis.predictions.utilities.confidence}%)`);
 
   return predictions.join('\n');
 }
@@ -208,9 +208,9 @@ function formatRenewablePredictions(analysis: AnalysisResult): string {
 function formatTraditionalPredictions(analysis: AnalysisResult): string {
   const predictions = [];
   
-  predictions.push(`🛢️ *Crude Oil:* ${analysis.predictions.crude_oil.direction === 'BULLISH' ? '📈 UP' : analysis.predictions.crude_oil.direction === 'BEARISH' ? '📉 DOWN' : '➡️ FLAT'} (${analysis.predictions.crude_oil.confidence}%)`);
+  predictions.push(`🛢️ *Crude Oil:* ${analysis.predictions.crude_oil.direction === 'UP' ? '📈 RISING' : analysis.predictions.crude_oil.direction === 'DOWN' ? '📉 FALLING' : '➡️ FLAT'} (${analysis.predictions.crude_oil.confidence}%)`);
   
-  predictions.push(`⛽ *Natural Gas:* ${analysis.predictions.natural_gas.direction === 'BULLISH' ? '🔥 RISING' : analysis.predictions.natural_gas.direction === 'BEARISH' ? '❄️ COOLING' : '🌡️ STEADY'} (${analysis.predictions.natural_gas.confidence}%)`);
+  predictions.push(`⛽ *Natural Gas:* ${analysis.predictions.natural_gas.direction === 'UP' ? '🔥 RISING' : analysis.predictions.natural_gas.direction === 'DOWN' ? '❄️ COOLING' : '🌡️ STEADY'} (${analysis.predictions.natural_gas.confidence}%)`);
 
   return predictions.join('\n');
 }
