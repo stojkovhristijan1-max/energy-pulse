@@ -194,21 +194,21 @@ ${generateTraditionalNewsBullets(traditionalNews)}
 
 *DAILY ENERGY MARKET ANALYSIS*
 
-${analysis.reasoning}
+${analysis.reasoning.length > 400 ? analysis.reasoning.substring(0, 397) + '...' : analysis.reasoning}
 
 *MARKET OUTLOOK*
 
 • *Crude Oil:* ${analysis.predictions.crude_oil.direction} trend expected (${analysis.predictions.crude_oil.confidence}% confidence)
-  ${analysis.predictions.crude_oil.reasoning}
+  ${analysis.predictions.crude_oil.reasoning.length > 100 ? analysis.predictions.crude_oil.reasoning.substring(0, 97) + '...' : analysis.predictions.crude_oil.reasoning}
 
 • *Natural Gas:* ${analysis.predictions.natural_gas.direction} movement anticipated (${analysis.predictions.natural_gas.confidence}% confidence)
-  ${analysis.predictions.natural_gas.reasoning}
+  ${analysis.predictions.natural_gas.reasoning.length > 100 ? analysis.predictions.natural_gas.reasoning.substring(0, 97) + '...' : analysis.predictions.natural_gas.reasoning}
 
 • *Energy Stocks:* ${analysis.predictions.energy_stocks.direction} direction forecasted (${analysis.predictions.energy_stocks.confidence}% confidence)
-  ${analysis.predictions.energy_stocks.reasoning}
+  ${analysis.predictions.energy_stocks.reasoning.length > 100 ? analysis.predictions.energy_stocks.reasoning.substring(0, 97) + '...' : analysis.predictions.energy_stocks.reasoning}
 
 • *Utilities Sector:* ${analysis.predictions.utilities.direction} outlook projected (${analysis.predictions.utilities.confidence}% confidence)
-  ${analysis.predictions.utilities.reasoning}
+  ${analysis.predictions.utilities.reasoning.length > 100 ? analysis.predictions.utilities.reasoning.substring(0, 97) + '...' : analysis.predictions.utilities.reasoning}
 
 ---
 Powered by [tcheevy.com](https://tcheevy.com)
@@ -230,8 +230,8 @@ function generateRenewableNewsBullets(renewableNews: NewsResult[]): string {
   topStories.forEach((article, index) => {
     const domain = extractDomain(article.url);
     const emoji = getRenewableEmoji(article.title);
-    // Create concise summary from title, max 80 chars
-    const summary = article.title.length > 80 ? article.title.substring(0, 77) + '...' : article.title;
+    // Create 3-sentence summary
+    const summary = create3SentenceSummary(article);
     bullets.push(`${index + 1}. ${emoji} ${summary}\n   Source: [${domain}](${article.url})`);
   });
 
@@ -251,12 +251,42 @@ function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
   topStories.forEach((article, index) => {
     const domain = extractDomain(article.url);
     const emoji = getTraditionalEmoji(article.title);
-    // Create concise summary from title, max 80 chars
-    const summary = article.title.length > 80 ? article.title.substring(0, 77) + '...' : article.title;
+    // Create 3-sentence summary
+    const summary = create3SentenceSummary(article);
     bullets.push(`${index + 1}. ${emoji} ${summary}\n   Source: [${domain}](${article.url})`);
   });
 
   return bullets.join('\n\n');
+}
+
+function create3SentenceSummary(article: NewsResult): string {
+  if (!article.content || article.content.length < 50) {
+    // Fallback: create summary from title
+    return `${article.title}. This development could impact energy markets. More details are expected to emerge.`;
+  }
+
+  // Split content into sentences
+  const sentences = article.content
+    .replace(/([.!?])\s+/g, '$1|SPLIT|')
+    .split('|SPLIT|')
+    .map(s => s.trim())
+    .filter(s => s.length > 10);
+
+  if (sentences.length >= 3) {
+    // Take first 3 sentences and ensure they're not too long
+    const summary = sentences.slice(0, 3)
+      .map(s => s.length > 120 ? s.substring(0, 117) + '...' : s)
+      .join(' ');
+    
+    return summary.length > 300 ? summary.substring(0, 297) + '...' : summary;
+  } else if (sentences.length === 2) {
+    // Use 2 sentences and add context
+    return `${sentences[0]} ${sentences[1]} This could have significant implications for the energy sector.`;
+  } else {
+    // Single sentence or short content
+    const mainSentence = sentences[0] || article.content.substring(0, 150);
+    return `${mainSentence} This development is being closely watched by energy market analysts. Further updates are expected.`;
+  }
 }
 
 function prioritizeNewsources(articles: NewsResult[]): NewsResult[] {
