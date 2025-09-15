@@ -169,7 +169,7 @@ function generateRenewableNewsBullets(renewableNews: NewsResult[]): string {
     return "• No major renewable energy developments reported today\n• Clean energy markets continue steady growth trajectory\n• Renewable sector maintains strong investor interest";
   }
 
-  const bullets = [];
+  const bullets: string[] = [];
   
   // Take up to 5 renewable news stories
   renewableNews.slice(0, 5).forEach(article => {
@@ -186,7 +186,7 @@ function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
     return "• Oil and gas markets show mixed signals amid global uncertainty\n• Traditional energy sector adapts to changing market dynamics\n• Fossil fuel companies continue strategic pivots";
   }
 
-  const bullets = [];
+  const bullets: string[] = [];
   
   // Take up to 4 traditional energy stories
   traditionalNews.slice(0, 4).forEach(article => {
