@@ -129,104 +129,83 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
     article.title.toLowerCase().includes('chevron')
   ) || [];
 
-  let message = `🌱 *Energy Transition Report - ${date}*
+  let message = `*Energy Pulse Report - ${date}*
 
-🔋 *CLEAN ENERGY SPOTLIGHT*
+*RENEWABLE ENERGY NEWS*
 
-${generateRenewableInsights(renewableNews, analysis)}
+${generateRenewableNewsBullets(renewableNews)}
 
-⚡ *RENEWABLE MARKET SIGNALS*
-${formatRenewablePredictions(analysis)}
+*OIL & GAS NEWS*
 
-🛢️ *TRADITIONAL ENERGY UPDATE*
+${generateTraditionalNewsBullets(traditionalNews)}
 
-${generateTraditionalInsights(traditionalNews, analysis)}
+*DAILY ENERGY MARKET ANALYSIS*
 
-📊 *FOSSIL FUEL OUTLOOK*
-${formatTraditionalPredictions(analysis)}
+${analysis.reasoning}
 
-🌍 *THE BIG PICTURE*
-${analysis.reasoning.length > 200 ? analysis.reasoning.substring(0, 200) + '...' : analysis.reasoning}
+*MARKET OUTLOOK*
+
+• *Crude Oil:* ${analysis.predictions.crude_oil.direction} trend expected (${analysis.predictions.crude_oil.confidence}% confidence)
+  ${analysis.predictions.crude_oil.reasoning}
+
+• *Natural Gas:* ${analysis.predictions.natural_gas.direction} movement anticipated (${analysis.predictions.natural_gas.confidence}% confidence)
+  ${analysis.predictions.natural_gas.reasoning}
+
+• *Energy Stocks:* ${analysis.predictions.energy_stocks.direction} direction forecasted (${analysis.predictions.energy_stocks.confidence}% confidence)
+  ${analysis.predictions.energy_stocks.reasoning}
+
+• *Utilities Sector:* ${analysis.predictions.utilities.direction} outlook projected (${analysis.predictions.utilities.confidence}% confidence)
+  ${analysis.predictions.utilities.reasoning}
 
 ---
-🔮 *Tomorrow's Energy Today*
-💚 _The future is renewable. Invest accordingly._
-⚡ Powered by [Energy Pulse AI](https://energy-pulse.vercel.app)`;
+Powered by [tcheevy.com](https://tcheevy.com)
+⚠️ *This is not trading advice. Always do your own research before making investment decisions.*`;
 
   return message.trim();
 }
 
-function generateRenewableInsights(renewableNews: NewsResult[], analysis: AnalysisResult): string {
+function generateRenewableNewsBullets(renewableNews: NewsResult[]): string {
   if (renewableNews.length === 0) {
-    return "🌱 Clean energy markets continue their steady transformation as renewable adoption accelerates globally.";
+    return "• No major renewable energy developments reported today\n• Clean energy markets continue steady growth trajectory\n• Renewable sector maintains strong investor interest";
   }
 
-  const topRenewableStory = renewableNews[0];
-  const insights = [];
-
-  // Add the top renewable story with context
-  insights.push(`🚀 *${topRenewableStory.title}*`);
+  const bullets = [];
   
-  // Add 2-3 more renewable highlights
-  renewableNews.slice(1, 4).forEach(article => {
-    const emoji = getEnergyEmoji(article.title);
-    insights.push(`${emoji} ${article.title.length > 80 ? article.title.substring(0, 80) + '...' : article.title}`);
+  // Take up to 5 renewable news stories
+  renewableNews.slice(0, 5).forEach(article => {
+    const domain = extractDomain(article.url);
+    const summary = article.content ? article.content.substring(0, 120) + '...' : article.title;
+    bullets.push(`• ${summary}\n  Source: [${domain}](${article.url})`);
   });
 
-  return insights.join('\n\n');
+  return bullets.join('\n\n');
 }
 
-function generateTraditionalInsights(traditionalNews: NewsResult[], analysis: AnalysisResult): string {
+function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
   if (traditionalNews.length === 0) {
-    return "🛢️ Traditional energy markets face ongoing pressure from renewable competition and policy shifts.";
+    return "• Oil and gas markets show mixed signals amid global uncertainty\n• Traditional energy sector adapts to changing market dynamics\n• Fossil fuel companies continue strategic pivots";
   }
 
-  const topTraditionalStory = traditionalNews[0];
-  const insights = [];
-
-  insights.push(`📈 *${topTraditionalStory.title}*`);
+  const bullets = [];
   
-  // Add 1-2 more traditional stories (less focus than renewables)
-  traditionalNews.slice(1, 3).forEach(article => {
-    insights.push(`⚡ ${article.title.length > 80 ? article.title.substring(0, 80) + '...' : article.title}`);
+  // Take up to 4 traditional energy stories
+  traditionalNews.slice(0, 4).forEach(article => {
+    const domain = extractDomain(article.url);
+    const summary = article.content ? article.content.substring(0, 120) + '...' : article.title;
+    bullets.push(`• ${summary}\n  Source: [${domain}](${article.url})`);
   });
 
-  return insights.join('\n\n');
+  return bullets.join('\n\n');
 }
 
-function formatRenewablePredictions(analysis: AnalysisResult): string {
-  const predictions = [];
-  
-  // Focus on renewable-friendly predictions
-  predictions.push(`🔋 *Clean Energy Stocks:* ${analysis.predictions.energy_stocks.direction === 'UP' ? '🚀 RISING' : analysis.predictions.energy_stocks.direction === 'DOWN' ? '📉 FALLING' : '➡️ STABLE'} (${analysis.predictions.energy_stocks.confidence}%)`);
-  
-  predictions.push(`⚡ *Utilities Transition:* ${analysis.predictions.utilities.direction === 'UP' ? '🌱 GROWING' : analysis.predictions.utilities.direction === 'DOWN' ? '📉 DECLINING' : '⚖️ MIXED'} (${analysis.predictions.utilities.confidence}%)`);
-
-  return predictions.join('\n');
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return 'Energy Source';
+  }
 }
 
-function formatTraditionalPredictions(analysis: AnalysisResult): string {
-  const predictions = [];
-  
-  predictions.push(`🛢️ *Crude Oil:* ${analysis.predictions.crude_oil.direction === 'UP' ? '📈 RISING' : analysis.predictions.crude_oil.direction === 'DOWN' ? '📉 FALLING' : '➡️ FLAT'} (${analysis.predictions.crude_oil.confidence}%)`);
-  
-  predictions.push(`⛽ *Natural Gas:* ${analysis.predictions.natural_gas.direction === 'UP' ? '🔥 RISING' : analysis.predictions.natural_gas.direction === 'DOWN' ? '❄️ COOLING' : '🌡️ STEADY'} (${analysis.predictions.natural_gas.confidence}%)`);
-
-  return predictions.join('\n');
-}
-
-function getEnergyEmoji(title: string): string {
-  const lower = title.toLowerCase();
-  if (lower.includes('solar')) return '☀️';
-  if (lower.includes('wind')) return '💨';
-  if (lower.includes('electric') || lower.includes('ev')) return '🔌';
-  if (lower.includes('battery')) return '🔋';
-  if (lower.includes('hydrogen')) return '⚡';
-  if (lower.includes('nuclear')) return '⚛️';
-  if (lower.includes('oil')) return '🛢️';
-  if (lower.includes('gas')) return '⛽';
-  return '⚡';
-}
 
 export async function sendWelcomeMessage(chatId: string, username: string): Promise<boolean> {
   if (!bot) {
