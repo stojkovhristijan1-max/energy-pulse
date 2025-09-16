@@ -225,7 +225,7 @@ function generateRenewableNewsBullets(renewableNews: NewsResult[]): string {
   const bullets: string[] = [];
   
   // Prioritize premium sources, then sort by relevance score
-  const topStories = prioritizeNewsources(renewableNews).slice(0, 4);
+  const topStories = prioritizeNewsources(renewableNews).slice(0, 3);
   
   topStories.forEach((article, index) => {
     const domain = extractDomain(article.url);
@@ -246,7 +246,7 @@ function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
   const bullets: string[] = [];
   
   // Prioritize premium sources, then sort by relevance score
-  const topStories = prioritizeNewsources(traditionalNews).slice(0, 3);
+  const topStories = prioritizeNewsources(traditionalNews).slice(0, 2);
   
   topStories.forEach((article, index) => {
     const domain = extractDomain(article.url);
@@ -265,30 +265,13 @@ function create3SentenceSummary(article: NewsResult): string {
     return article.title;
   }
 
-  // Clean content - remove advertisements and subscription prompts
-  let cleanContent = article.content
-    .replace(/ADVERTISEMENT/gi, '')
-    .replace(/Subscribe to/gi, '')
-    .replace(/Sign up for/gi, '')
-    .replace(/Get unlimited access/gi, '')
-    .replace(/Read more:/gi, '')
-    .replace(/Click here/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  // Take first 200 characters and find natural sentence break
-  const summary = cleanContent.substring(0, 200);
-  const lastPeriod = summary.lastIndexOf('.');
-  const lastQuestion = summary.lastIndexOf('?');
-  const lastExclamation = summary.lastIndexOf('!');
+  // Quick clean and truncate - optimized for speed
+  const cleanContent = article.content
+    .replace(/ADVERTISEMENT|Subscribe to|Sign up for/gi, '')
+    .substring(0, 150);
   
-  const lastSentenceEnd = Math.max(lastPeriod, lastQuestion, lastExclamation);
-  
-  if (lastSentenceEnd > 50) {
-    return summary.substring(0, lastSentenceEnd + 1);
-  } else {
-    return summary + '...';
-  }
+  const lastDot = cleanContent.lastIndexOf('.');
+  return lastDot > 30 ? cleanContent.substring(0, lastDot + 1) : cleanContent + '...';
 }
 
 function prioritizeNewsources(articles: NewsResult[]): NewsResult[] {
