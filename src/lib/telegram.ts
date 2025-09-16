@@ -110,7 +110,7 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
   const relevantNews = getMostRelevantEnergyNews(newsData || []);
 
   let message = `⚡ Energy Pulse Daily Report
-${date}
+📅 ${date}
 
 📰 *Today's Most Relevant Energy News:*
 
@@ -121,7 +121,7 @@ ${createMarketAnalysis(relevantNews, analysis)}
 
 ---
 ⚡ Powered by [tcheevy.com](https://tcheevy.com)
-💡 _This is not financial advice. Trade at your own risk._`;
+⚠️ _This is not financial advice. Trade at your own risk._`;
 
   return message.trim();
 }
@@ -154,16 +154,17 @@ function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
     return (bBonus + (b.score || 0)) - (aBonus + (a.score || 0));
   });
   
-  // Take top 6 relevant stories 
-  return sortedByRelevance.slice(0, 6);
+  // Take top 8 relevant stories 
+  return sortedByRelevance.slice(0, 8);
 }
 
 function formatNewsWithAnalysis(newsArticles: NewsResult[], analysis?: AnalysisResult): string {
   // If we have Groq analysis with summary bullet points, use those instead
   if (analysis && analysis.summary && Array.isArray(analysis.summary)) {
-    return analysis.summary.slice(0, 6).map((item: any, index: number) => {
+    return analysis.summary.slice(0, 8).map((item: any, index: number) => {
       const domain = item.source_url ? extractDomain(item.source_url) : 'Energy Source';
-      return `• ${item.text}\n  📰 [${domain}](${item.source_url || '#'})`;
+      const emoji = getNewsEmoji(item.text);
+      return `${emoji} ${item.text}\n  📰 [${domain}](${item.source_url || '#'})`;
     }).join('\n\n');
   }
   
@@ -260,6 +261,39 @@ function extractDomain(url: string): string {
   } catch {
     return 'Energy Source';
   }
+}
+
+function getNewsEmoji(text: string): string {
+  const lower = text.toLowerCase();
+  
+  // Renewable energy
+  if (lower.includes('solar') || lower.includes('photovoltaic')) return '☀️';
+  if (lower.includes('wind') || lower.includes('turbine')) return '💨';
+  if (lower.includes('renewable') || lower.includes('clean energy')) return '🌱';
+  if (lower.includes('electric') || lower.includes('ev') || lower.includes('battery')) return '🔋';
+  if (lower.includes('hydrogen') || lower.includes('fuel cell')) return '💧';
+  
+  // Traditional energy
+  if (lower.includes('oil') || lower.includes('crude') || lower.includes('petroleum')) return '🛢️';
+  if (lower.includes('gas') || lower.includes('lng') || lower.includes('pipeline')) return '🔥';
+  if (lower.includes('coal') || lower.includes('mining')) return '⛏️';
+  if (lower.includes('nuclear') || lower.includes('uranium')) return '⚛️';
+  
+  // Market & financial
+  if (lower.includes('stock') || lower.includes('share') || lower.includes('earnings')) return '📈';
+  if (lower.includes('price') || lower.includes('cost') || lower.includes('market')) return '💰';
+  if (lower.includes('investment') || lower.includes('funding') || lower.includes('capital')) return '💵';
+  
+  // Policy & regulation
+  if (lower.includes('policy') || lower.includes('regulation') || lower.includes('government')) return '🏛️';
+  if (lower.includes('climate') || lower.includes('emission') || lower.includes('carbon')) return '🌍';
+  
+  // Technology & innovation
+  if (lower.includes('technology') || lower.includes('innovation') || lower.includes('breakthrough')) return '🚀';
+  if (lower.includes('storage') || lower.includes('grid') || lower.includes('infrastructure')) return '⚡';
+  
+  // Default
+  return '•';
 }
 
 function isQualityNewsContent(article: NewsResult): boolean {

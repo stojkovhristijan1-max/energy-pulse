@@ -55,6 +55,14 @@ Please provide your analysis in the following JSON format. For each summary bull
     {
       "text": "Key bullet point 6 about energy sector outlook",
       "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 7 about technology/innovation trends",
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 8 about market sentiment/investor activity",
+      "source_url": "URL from the news data that supports this point"
     }
   ],
   "predictions": {
