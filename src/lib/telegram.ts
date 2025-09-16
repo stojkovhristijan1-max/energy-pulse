@@ -132,10 +132,14 @@ function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
     'marketwatch.com', 'oilprice.com', 'energyvoice.com', 'platts.com'
   ];
   
-  // Filter for English articles from trusted sources
+  // Filter for English articles from trusted sources with quality content
   const trustedArticles = newsData.filter(article => {
     const domain = extractDomain(article.url);
-    return trustedSources.includes(domain) || isEnglishContent(article);
+    const isTrustedSource = trustedSources.includes(domain);
+    const isEnglish = isEnglishContent(article);
+    const hasQualityContent = isQualityNewsContent(article);
+    
+    return isTrustedSource && isEnglish && hasQualityContent;
   });
   
   // Sort by relevance (score) and source trustworthiness
@@ -171,16 +175,29 @@ function analyzeAndSummarizeArticle(article: NewsResult): string {
     .replace(/\s+/g, ' ')
     .trim();
   
-  // Extract key sentences - focus on first paragraph for most important info
-  const sentences = cleanContent.split(/[.!?]+/).filter(s => s.trim().length > 20);
+  // Extract meaningful sentences (avoid fragments and charts)
+  const sentences = cleanContent.split(/[.!?]+/)
+    .filter(s => s.trim().length > 30 && !s.includes('Graph') && !s.includes('Chart') && !s.includes('|'))
+    .map(s => s.trim());
   
   if (sentences.length >= 2) {
-    // Create 2-sentence summary with key information
+    // Take first 2 complete sentences
     const summary = sentences.slice(0, 2).join('. ').trim() + '.';
-    return summary.length > 250 ? summary.substring(0, 247) + '...' : summary;
+    // Ensure we don't cut off mid-word
+    if (summary.length > 200) {
+      const truncated = summary.substring(0, 197);
+      const lastSpace = truncated.lastIndexOf(' ');
+      return truncated.substring(0, lastSpace) + '...';
+    }
+    return summary;
   } else if (sentences.length === 1) {
     const sentence = sentences[0].trim() + '.';
-    return sentence.length > 200 ? sentence.substring(0, 197) + '...' : sentence;
+    if (sentence.length > 150) {
+      const truncated = sentence.substring(0, 147);
+      const lastSpace = truncated.lastIndexOf(' ');
+      return truncated.substring(0, lastSpace) + '...';
+    }
+    return sentence;
   } else {
     return article.title;
   }
@@ -199,18 +216,29 @@ function createMarketAnalysis(newsArticles: NewsResult[], analysis: AnalysisResu
 }
 
 function isEnglishContent(article: NewsResult): boolean {
-  // Fast English check - just check title for speed
   const title = article.title.toLowerCase();
-  const englishWords = ['the', 'and', 'in', 'to', 'for', 'of'];
+  const content = (article.content || '').toLowerCase();
+  const text = title + ' ' + content.substring(0, 200);
   
-  // Quick check - if title contains any 2 common English words, it's likely English
-  let count = 0;
+  const englishWords = ['the', 'and', 'in', 'to', 'for', 'of', 'with', 'by', 'on', 'at'];
+  const germanWords = ['der', 'die', 'das', 'und', 'mit', 'von', 'zu', 'auf'];
+  
+  let englishCount = 0;
+  let germanCount = 0;
+  
   for (const word of englishWords) {
-    if (title.includes(word)) count++;
-    if (count >= 2) return true;
+    if (text.includes(' ' + word + ' ') || text.startsWith(word + ' ') || text.endsWith(' ' + word)) {
+      englishCount++;
+    }
   }
   
-  return false;
+  for (const word of germanWords) {
+    if (text.includes(' ' + word + ' ') || text.startsWith(word + ' ') || text.endsWith(' ' + word)) {
+      germanCount++;
+    }
+  }
+  
+  return englishCount >= 2 && germanCount === 0;
 }
 
 function extractDomain(url: string): string {
@@ -219,6 +247,30 @@ function extractDomain(url: string): string {
   } catch {
     return 'Energy Source';
   }
+}
+
+function isQualityNewsContent(article: NewsResult): boolean {
+  const title = article.title.toLowerCase();
+  const content = (article.content || '').toLowerCase();
+  
+  // Filter out pricing tables, charts, and low-quality content
+  const badPatterns = [
+    'graph up', 'graph down', 'chart', '| --- --- ---', 
+    'last updated', '% change', 'pricing', 'blend flag',
+    'opec members', 'daily pricing', 'bonny light', 'louisiana light'
+  ];
+  
+  const hasBadPattern = badPatterns.some(pattern => 
+    title.includes(pattern) || content.includes(pattern)
+  );
+  
+  // Must have substantial content
+  const hasSubstantialContent = Boolean(article.content && article.content.length > 100);
+  
+  // Must be actual news, not just data
+  const isActualNews = title.length > 20 && !title.includes('•') && !title.includes('|');
+  
+  return !hasBadPattern && hasSubstantialContent && isActualNews;
 }
 
 function getRenewableEmoji(title: string): string {
