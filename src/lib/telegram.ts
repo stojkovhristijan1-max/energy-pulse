@@ -113,7 +113,7 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
 
 📰 *Today's Most Relevant Energy News:*
 
-${formatNewsWithAnalysis(relevantNews)}
+${formatNewsWithAnalysis(relevantNews, analysis)}
 
 📊 *Energy Market Analysis:*
 ${createMarketAnalysis(relevantNews, analysis)}
@@ -157,7 +157,16 @@ function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
   return sortedByRelevance.slice(0, 6);
 }
 
-function formatNewsWithAnalysis(newsArticles: NewsResult[]): string {
+function formatNewsWithAnalysis(newsArticles: NewsResult[], analysis?: AnalysisResult): string {
+  // If we have Groq analysis with summary bullet points, use those instead
+  if (analysis && analysis.summary && Array.isArray(analysis.summary)) {
+    return analysis.summary.slice(0, 5).map((item: any, index: number) => {
+      const domain = item.source_url ? extractDomain(item.source_url) : 'Energy Source';
+      return `• ${item.text}\n  📰 [${domain}](${item.source_url || '#'})`;
+    }).join('\n\n');
+  }
+  
+  // Fallback to manual summarization if Groq analysis is not available
   return newsArticles.map((article, index) => {
     const summary = analyzeAndSummarizeArticle(article);
     const domain = extractDomain(article.url);
