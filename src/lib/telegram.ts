@@ -106,34 +106,17 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
     day: 'numeric' 
   });
 
-  // Get mixed news with 2-3 renewable stories included
-  const mixedNews = getMixedEnergyNews(newsData || []);
+  // Get the most relevant daily energy news from trustworthy sources
+  const relevantNews = getMostRelevantEnergyNews(newsData || []);
 
-  let message = `Energy Insights AI - ${date}
+  let message = `Energy Daily Report - ${date}
 
-📊 *Market Summary:*
-${formatMixedNewsSection(mixedNews, analysis)}
+📰 *Today's Most Relevant Energy News:*
 
-📈 *Probabilistic Outcomes (Next 1-7 Days):*
+${formatNewsWithAnalysis(relevantNews)}
 
-🛢️ *Crude Oil:* ${analysis.predictions.crude_oil.direction.toUpperCase()} 
-   _Confidence: ${analysis.predictions.crude_oil.confidence}%_
-   ${analysis.predictions.crude_oil.reasoning.length > 200 ? analysis.predictions.crude_oil.reasoning.substring(0, 197) + '...' : analysis.predictions.crude_oil.reasoning}
-
-⛽ *Natural Gas:* ${analysis.predictions.natural_gas.direction.toUpperCase()}
-   _Confidence: ${analysis.predictions.natural_gas.confidence}%_
-   ${analysis.predictions.natural_gas.reasoning.length > 200 ? analysis.predictions.natural_gas.reasoning.substring(0, 197) + '...' : analysis.predictions.natural_gas.reasoning}
-
-⚡ *Energy Stocks:* ${analysis.predictions.energy_stocks.direction.toUpperCase()}
-   _Confidence: ${analysis.predictions.energy_stocks.confidence}%_
-   ${analysis.predictions.energy_stocks.reasoning.length > 200 ? analysis.predictions.energy_stocks.reasoning.substring(0, 197) + '...' : analysis.predictions.energy_stocks.reasoning}
-
-🏭 *Utilities:* ${analysis.predictions.utilities.direction.toUpperCase()}
-   _Confidence: ${analysis.predictions.utilities.confidence}%_
-   ${analysis.predictions.utilities.reasoning.length > 200 ? analysis.predictions.utilities.reasoning.substring(0, 197) + '...' : analysis.predictions.utilities.reasoning}
-
-🧠 *Analysis:*
-${analysis.reasoning.length > 500 ? analysis.reasoning.substring(0, 497) + '...' : analysis.reasoning}
+📊 *Energy Market Analysis:*
+${createMarketAnalysis(relevantNews, analysis)}
 
 ---
 ⚡ Powered by [tcheevy.com](https://tcheevy.com)
@@ -142,83 +125,77 @@ ${analysis.reasoning.length > 500 ? analysis.reasoning.substring(0, 497) + '...'
   return message.trim();
 }
 
-function getMixedEnergyNews(newsData: NewsResult[]): NewsResult[] {
-  // English-language popular sites only
-  const englishSites = ['bloomberg.com', 'reuters.com', 'cnbc.com', 'wsj.com', 'ft.com', 'marketwatch.com', 'oilprice.com', 'energyvoice.com'];
+function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
+  // Trustworthy English sources only
+  const trustedSources = [
+    'bloomberg.com', 'reuters.com', 'cnbc.com', 'wsj.com', 'ft.com', 
+    'marketwatch.com', 'oilprice.com', 'energyvoice.com', 'platts.com'
+  ];
   
-  // Filter for English articles only
-  const englishArticles = newsData.filter(article => {
+  // Filter for English articles from trusted sources
+  const trustedArticles = newsData.filter(article => {
     const domain = extractDomain(article.url);
-    return englishSites.includes(domain) || isEnglishContent(article);
+    return trustedSources.includes(domain) || isEnglishContent(article);
   });
   
-  // Separate renewable and conventional news
-  const renewable: NewsResult[] = [];
-  const conventional: NewsResult[] = [];
-  
-  englishArticles.forEach(article => {
-    const text = (article.title + ' ' + (article.content || '')).toLowerCase();
-    
-    if (text.includes('solar') || text.includes('wind') || text.includes('renewable') || 
-        text.includes('electric') || text.includes('battery') || text.includes('clean')) {
-      renewable.push(article);
-    } else {
-      conventional.push(article);
-    }
+  // Sort by relevance (score) and source trustworthiness
+  const sortedByRelevance = trustedArticles.sort((a, b) => {
+    const aDomain = extractDomain(a.url);
+    const bDomain = extractDomain(b.url);
+    const aBonus = trustedSources.includes(aDomain) ? 1000 : 0;
+    const bBonus = trustedSources.includes(bDomain) ? 1000 : 0;
+    return (bBonus + (b.score || 0)) - (aBonus + (a.score || 0));
   });
   
-  // Sort by popularity and score
-  const sortByPopularity = (articles: NewsResult[]) => {
-    return articles.sort((a, b) => {
-      const aDomain = extractDomain(a.url);
-      const bDomain = extractDomain(b.url);
-      const aPopular = englishSites.includes(aDomain) ? 1000 : 0;
-      const bPopular = englishSites.includes(bDomain) ? 1000 : 0;
-      return (bPopular + (b.score || 0)) - (aPopular + (a.score || 0));
-    });
-  };
-  
-  // Take 2 renewable and 2 conventional to total 4 stories for speed
-  const topRenewable = sortByPopularity(renewable).slice(0, 2);
-  const topConventional = sortByPopularity(conventional).slice(0, 2);
-  
-  // Mix them together
-  return [...topConventional, ...topRenewable];
+  // Take top 5 most relevant stories
+  return sortedByRelevance.slice(0, 5);
 }
 
-function formatMixedNewsSection(mixedNews: NewsResult[], analysis: AnalysisResult): string {
-  return mixedNews.map((article, index) => {
+function formatNewsWithAnalysis(newsArticles: NewsResult[]): string {
+  return newsArticles.map((article, index) => {
+    const summary = analyzeAndSummarizeArticle(article);
     const domain = extractDomain(article.url);
-    // Create 2-3 sentence summary from the actual article content
-    const summary = summarizeArticleInBulletPoint(article);
     
-    return `• ${summary}\n  📰 [Source](${article.url})`;
+    return `• ${summary}\n  📰 [${domain}](${article.url})`;
   }).join('\n\n');
 }
 
-function summarizeArticleInBulletPoint(article: NewsResult): string {
+function analyzeAndSummarizeArticle(article: NewsResult): string {
   if (!article.content || article.content.length < 50) {
     return article.title;
   }
   
-  // Fast clean - only remove most common ads, limit to first 300 chars for speed
-  const content = article.content
-    .substring(0, 300)
-    .replace(/ADVERTISEMENT|Subscribe/gi, '')
+  // Clean content from ads and subscriptions
+  const cleanContent = article.content
+    .replace(/ADVERTISEMENT|Subscribe|Sign up|Get unlimited access|Click here|Read more/gi, '')
+    .replace(/\s+/g, ' ')
     .trim();
   
-  // Quick sentence split - take first 2 sentences only
-  const sentences = content.split(/[.!?]/).filter(s => s.trim().length > 15);
+  // Extract key sentences - focus on first paragraph for most important info
+  const sentences = cleanContent.split(/[.!?]+/).filter(s => s.trim().length > 20);
   
   if (sentences.length >= 2) {
-    const summary = sentences[0].trim() + '. ' + sentences[1].trim() + '.';
-    return summary.length > 200 ? summary.substring(0, 197) + '...' : summary;
+    // Create 2-sentence summary with key information
+    const summary = sentences.slice(0, 2).join('. ').trim() + '.';
+    return summary.length > 250 ? summary.substring(0, 247) + '...' : summary;
   } else if (sentences.length === 1) {
     const sentence = sentences[0].trim() + '.';
-    return sentence.length > 180 ? sentence.substring(0, 177) + '...' : sentence;
+    return sentence.length > 200 ? sentence.substring(0, 197) + '...' : sentence;
   } else {
-    return content.substring(0, 120) + '...';
+    return article.title;
   }
+}
+
+function createMarketAnalysis(newsArticles: NewsResult[], analysis: AnalysisResult): string {
+  // Create a short overall analysis of energy market based on the news
+  const newsContext = newsArticles.map(article => article.title).join('. ');
+  
+  // Use the AI analysis but focus on market implications
+  const marketInsights = analysis.reasoning.length > 300 
+    ? analysis.reasoning.substring(0, 297) + '...' 
+    : analysis.reasoning;
+  
+  return marketInsights;
 }
 
 function isEnglishContent(article: NewsResult): boolean {
