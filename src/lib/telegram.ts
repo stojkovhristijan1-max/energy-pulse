@@ -154,14 +154,14 @@ function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
     return (bBonus + (b.score || 0)) - (aBonus + (a.score || 0));
   });
   
-  // Take top 6 most relevant stories 
-  return sortedByRelevance.slice(0, 6);
+  // Take top 4 stories for faster processing
+  return sortedByRelevance.slice(0, 4);
 }
 
 function formatNewsWithAnalysis(newsArticles: NewsResult[], analysis?: AnalysisResult): string {
   // If we have Groq analysis with summary bullet points, use those instead
   if (analysis && analysis.summary && Array.isArray(analysis.summary)) {
-    return analysis.summary.slice(0, 5).map((item: any, index: number) => {
+    return analysis.summary.slice(0, 4).map((item: any, index: number) => {
       const domain = item.source_url ? extractDomain(item.source_url) : 'Energy Source';
       return `• ${item.text}\n  📰 [${domain}](${item.source_url || '#'})`;
     }).join('\n\n');
