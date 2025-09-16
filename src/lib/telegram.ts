@@ -106,36 +106,47 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
     day: 'numeric' 
   });
 
-  // Get exactly 6 news: 3 renewable + 3 conventional, prioritizing popular sites
-  const { renewableNews, conventionalNews } = categorizeAndPrioritizeNews(newsData || []);
+  // Get mixed news with 2-3 renewable stories included
+  const mixedNews = getMixedEnergyNews(newsData || []);
 
-  let message = `*Energy Pulse Report - ${date}*
+  let message = `Energy Insights AI - ${date}
 
-${formatNewsSection(renewableNews, conventionalNews)}
+📊 *Market Summary:*
+${formatMixedNewsSection(mixedNews, analysis)}
 
-*Energy Market Analysis*
+📈 *Probabilistic Outcomes (Next 1-7 Days):*
 
-${analysis.reasoning}
+🛢️ *Crude Oil:* ${analysis.predictions.crude_oil.direction.toUpperCase()} 
+   _Confidence: ${analysis.predictions.crude_oil.confidence}%_
+   ${analysis.predictions.crude_oil.reasoning.length > 200 ? analysis.predictions.crude_oil.reasoning.substring(0, 197) + '...' : analysis.predictions.crude_oil.reasoning}
 
-*Market Predictions*
+⛽ *Natural Gas:* ${analysis.predictions.natural_gas.direction.toUpperCase()}
+   _Confidence: ${analysis.predictions.natural_gas.confidence}%_
+   ${analysis.predictions.natural_gas.reasoning.length > 200 ? analysis.predictions.natural_gas.reasoning.substring(0, 197) + '...' : analysis.predictions.natural_gas.reasoning}
 
-• Crude Oil: ${analysis.predictions.crude_oil.direction} (${analysis.predictions.crude_oil.confidence}% confidence)
-• Natural Gas: ${analysis.predictions.natural_gas.direction} (${analysis.predictions.natural_gas.confidence}% confidence)  
-• Energy Stocks: ${analysis.predictions.energy_stocks.direction} (${analysis.predictions.energy_stocks.confidence}% confidence)
-• Utilities: ${analysis.predictions.utilities.direction} (${analysis.predictions.utilities.confidence}% confidence)
+⚡ *Energy Stocks:* ${analysis.predictions.energy_stocks.direction.toUpperCase()}
+   _Confidence: ${analysis.predictions.energy_stocks.confidence}%_
+   ${analysis.predictions.energy_stocks.reasoning.length > 200 ? analysis.predictions.energy_stocks.reasoning.substring(0, 197) + '...' : analysis.predictions.energy_stocks.reasoning}
+
+🏭 *Utilities:* ${analysis.predictions.utilities.direction.toUpperCase()}
+   _Confidence: ${analysis.predictions.utilities.confidence}%_
+   ${analysis.predictions.utilities.reasoning.length > 200 ? analysis.predictions.utilities.reasoning.substring(0, 197) + '...' : analysis.predictions.utilities.reasoning}
+
+🧠 *Analysis:*
+${analysis.reasoning.length > 500 ? analysis.reasoning.substring(0, 497) + '...' : analysis.reasoning}
 
 ---
-Powered by [tcheevy.com](https://tcheevy.com)
-⚠️ *This is not trading advice. Always do your own research before making investment decisions.*`;
+⚡ Powered by [tcheevy.com](https://tcheevy.com)
+💡 _This is not financial advice. Trade at your own risk._`;
 
   return message.trim();
 }
 
-function categorizeAndPrioritizeNews(newsData: NewsResult[]): { renewableNews: NewsResult[], conventionalNews: NewsResult[] } {
-  // Popular sites prioritized for speed and quality
+function getMixedEnergyNews(newsData: NewsResult[]): NewsResult[] {
+  // Get all news and prioritize popular sites
   const popularSites = ['bloomberg.com', 'reuters.com', 'cnbc.com', 'wsj.com', 'ft.com', 'marketwatch.com', 'oilprice.com'];
   
-  // Fast categorization
+  // Separate renewable and conventional news
   const renewable: NewsResult[] = [];
   const conventional: NewsResult[] = [];
   
@@ -145,46 +156,40 @@ function categorizeAndPrioritizeNews(newsData: NewsResult[]): { renewableNews: N
     if (text.includes('solar') || text.includes('wind') || text.includes('renewable') || 
         text.includes('electric') || text.includes('battery') || text.includes('clean')) {
       renewable.push(article);
-    } else if (text.includes('oil') || text.includes('gas') || text.includes('opec') || 
-               text.includes('crude') || text.includes('petroleum')) {
+    } else {
       conventional.push(article);
     }
   });
   
-  // Prioritize popular sites and take top 3 each
+  // Sort by popularity and score
   const sortByPopularity = (articles: NewsResult[]) => {
-    return articles
-      .sort((a, b) => {
-        const aDomain = extractDomain(a.url);
-        const bDomain = extractDomain(b.url);
-        const aPopular = popularSites.includes(aDomain) ? 1000 : 0;
-        const bPopular = popularSites.includes(bDomain) ? 1000 : 0;
-        return (bPopular + (b.score || 0)) - (aPopular + (a.score || 0));
-      })
-      .slice(0, 3);
+    return articles.sort((a, b) => {
+      const aDomain = extractDomain(a.url);
+      const bDomain = extractDomain(b.url);
+      const aPopular = popularSites.includes(aDomain) ? 1000 : 0;
+      const bPopular = popularSites.includes(bDomain) ? 1000 : 0;
+      return (bPopular + (b.score || 0)) - (aPopular + (a.score || 0));
+    });
   };
   
-  return {
-    renewableNews: sortByPopularity(renewable),
-    conventionalNews: sortByPopularity(conventional)
-  };
+  // Take 2-3 renewable and 3-4 conventional to total 5-6 stories
+  const topRenewable = sortByPopularity(renewable).slice(0, 3);
+  const topConventional = sortByPopularity(conventional).slice(0, 3);
+  
+  // Mix them together, ensuring we get renewable stories
+  return [...topConventional, ...topRenewable].slice(0, 5);
 }
 
-function formatNewsSection(renewableNews: NewsResult[], conventionalNews: NewsResult[]): string {
-  let newsSection = '';
-  let counter = 1;
-  
-  // Format all 6 news items with minimal emojis
-  [...renewableNews, ...conventionalNews].forEach(article => {
+function formatMixedNewsSection(mixedNews: NewsResult[], analysis: AnalysisResult): string {
+  return mixedNews.map((article, index) => {
     const domain = extractDomain(article.url);
-    const summary = createFastSummary(article);
-    const emoji = counter <= 3 ? '🔋' : '⛽'; // Minimal emoji use
+    // Use the summary from analysis if available, otherwise create one
+    const summaryPoint = analysis.summary[index];
+    const summary = summaryPoint ? summaryPoint.text : createFastSummary(article);
+    const sourceUrl = summaryPoint ? summaryPoint.source_url : article.url;
     
-    newsSection += `${counter}. ${emoji} ${summary}\n   Source: [${domain}](${article.url})\n\n`;
-    counter++;
-  });
-  
-  return newsSection.trim();
+    return `• ${summary}\n  📰 [Source](${sourceUrl})`;
+  }).join('\n\n');
 }
 
 function createFastSummary(article: NewsResult): string {
@@ -192,14 +197,11 @@ function createFastSummary(article: NewsResult): string {
     return article.title;
   }
   
-  // Fast 2-3 sentence summary - optimized for 10s execution
-  const clean = article.content.replace(/ADVERTISEMENT|Subscribe/gi, '').substring(0, 120);
-  const sentences = clean.split('.').filter(s => s.length > 20);
+  // Fast summary - optimized for 10s execution
+  const clean = article.content.replace(/ADVERTISEMENT|Subscribe/gi, '').substring(0, 150);
+  const sentences = clean.split('.').filter(s => s.length > 15);
   
-  if (sentences.length >= 2) {
-    return sentences[0] + '. ' + sentences[1] + '.';
-  }
-  return clean + (clean.endsWith('.') ? '' : '...');
+  return sentences.length >= 1 ? sentences[0] + '.' : clean + '...';
 }
 
 function extractDomain(url: string): string {
