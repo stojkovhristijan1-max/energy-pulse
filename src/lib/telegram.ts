@@ -106,109 +106,23 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
     day: 'numeric' 
   });
 
-  // Separate renewable and traditional energy news with wider scope
-  const renewableNews = newsData?.filter(article => {
-    const title = article.title.toLowerCase();
-    const content = article.content?.toLowerCase() || '';
-    const text = title + ' ' + content;
-    
-    return text.includes('solar') ||
-           text.includes('wind') ||
-           text.includes('renewable') ||
-           text.includes('electric') ||
-           text.includes('battery') ||
-           text.includes('clean') ||
-           text.includes('green') ||
-           text.includes('ev') ||
-           text.includes('tesla') ||
-           text.includes('hydrogen') ||
-           text.includes('climate') ||
-           text.includes('carbon') ||
-           text.includes('transition') ||
-           text.includes('sustainable') ||
-           text.includes('nuclear') ||
-           text.includes('storage') ||
-           text.includes('charging') ||
-           text.includes('lithium') ||
-           text.includes('photovoltaic') ||
-           text.includes('offshore') ||
-           text.includes('geothermal') ||
-           text.includes('biomass') ||
-           text.includes('hydro') ||
-           text.includes('fuel cell') ||
-           text.includes('grid') ||
-           text.includes('smart energy') ||
-           text.includes('energy efficiency') ||
-           text.includes('decarboniz') ||
-           text.includes('net zero') ||
-           text.includes('emission') ||
-           text.includes('ira') ||
-           text.includes('inflation reduction act') ||
-           text.includes('subsidy') ||
-           text.includes('incentive') ||
-           text.includes('policy') ||
-           text.includes('regulation');
-  }) || [];
-
-  const traditionalNews = newsData?.filter(article => {
-    const title = article.title.toLowerCase();
-    const content = article.content?.toLowerCase() || '';
-    const text = title + ' ' + content;
-    
-    return text.includes('oil') ||
-           text.includes('gas') ||
-           text.includes('opec') ||
-           text.includes('crude') ||
-           text.includes('petroleum') ||
-           text.includes('drilling') ||
-           text.includes('refinery') ||
-           text.includes('pipeline') ||
-           text.includes('lng') ||
-           text.includes('natural gas') ||
-           text.includes('shale') ||
-           text.includes('fracking') ||
-           text.includes('exxon') ||
-           text.includes('chevron') ||
-           text.includes('shell') ||
-           text.includes('bp') ||
-           text.includes('total') ||
-           text.includes('conocophillips') ||
-           text.includes('saudi') ||
-           text.includes('russia') ||
-           text.includes('venezuela') ||
-           text.includes('iran') ||
-           text.includes('iraq') ||
-           text.includes('wti') ||
-           text.includes('brent');
-  }) || [];
+  // Get exactly 6 news: 3 renewable + 3 conventional, prioritizing popular sites
+  const { renewableNews, conventionalNews } = categorizeAndPrioritizeNews(newsData || []);
 
   let message = `*Energy Pulse Report - ${date}*
 
-*RENEWABLE ENERGY NEWS*
+${formatNewsSection(renewableNews, conventionalNews)}
 
-${generateRenewableNewsBullets(renewableNews)}
+*Energy Market Analysis*
 
-*OIL & GAS NEWS*
+${analysis.reasoning}
 
-${generateTraditionalNewsBullets(traditionalNews)}
+*Market Predictions*
 
-*DAILY ENERGY MARKET ANALYSIS*
-
-${analysis.reasoning.length > 400 ? analysis.reasoning.substring(0, 397) + '...' : analysis.reasoning}
-
-*MARKET OUTLOOK*
-
-• *Crude Oil:* ${analysis.predictions.crude_oil.direction} trend expected (${analysis.predictions.crude_oil.confidence}% confidence)
-  ${analysis.predictions.crude_oil.reasoning.length > 100 ? analysis.predictions.crude_oil.reasoning.substring(0, 97) + '...' : analysis.predictions.crude_oil.reasoning}
-
-• *Natural Gas:* ${analysis.predictions.natural_gas.direction} movement anticipated (${analysis.predictions.natural_gas.confidence}% confidence)
-  ${analysis.predictions.natural_gas.reasoning.length > 100 ? analysis.predictions.natural_gas.reasoning.substring(0, 97) + '...' : analysis.predictions.natural_gas.reasoning}
-
-• *Energy Stocks:* ${analysis.predictions.energy_stocks.direction} direction forecasted (${analysis.predictions.energy_stocks.confidence}% confidence)
-  ${analysis.predictions.energy_stocks.reasoning.length > 100 ? analysis.predictions.energy_stocks.reasoning.substring(0, 97) + '...' : analysis.predictions.energy_stocks.reasoning}
-
-• *Utilities Sector:* ${analysis.predictions.utilities.direction} outlook projected (${analysis.predictions.utilities.confidence}% confidence)
-  ${analysis.predictions.utilities.reasoning.length > 100 ? analysis.predictions.utilities.reasoning.substring(0, 97) + '...' : analysis.predictions.utilities.reasoning}
+• Crude Oil: ${analysis.predictions.crude_oil.direction} (${analysis.predictions.crude_oil.confidence}% confidence)
+• Natural Gas: ${analysis.predictions.natural_gas.direction} (${analysis.predictions.natural_gas.confidence}% confidence)  
+• Energy Stocks: ${analysis.predictions.energy_stocks.direction} (${analysis.predictions.energy_stocks.confidence}% confidence)
+• Utilities: ${analysis.predictions.utilities.direction} (${analysis.predictions.utilities.confidence}% confidence)
 
 ---
 Powered by [tcheevy.com](https://tcheevy.com)
@@ -217,95 +131,75 @@ Powered by [tcheevy.com](https://tcheevy.com)
   return message.trim();
 }
 
-function generateRenewableNewsBullets(renewableNews: NewsResult[]): string {
-  if (renewableNews.length === 0) {
-    return "1. 🔋 No major renewable energy developments reported today\n2. 🌱 Clean energy markets continue steady growth trajectory\n3. ⚡ Renewable sector maintains strong investor interest";
-  }
-
-  const bullets: string[] = [];
+function categorizeAndPrioritizeNews(newsData: NewsResult[]): { renewableNews: NewsResult[], conventionalNews: NewsResult[] } {
+  // Popular sites prioritized for speed and quality
+  const popularSites = ['bloomberg.com', 'reuters.com', 'cnbc.com', 'wsj.com', 'ft.com', 'marketwatch.com', 'oilprice.com'];
   
-  // Prioritize premium sources, then sort by relevance score
-  const topStories = prioritizeNewsources(renewableNews).slice(0, 3);
+  // Fast categorization
+  const renewable: NewsResult[] = [];
+  const conventional: NewsResult[] = [];
   
-  topStories.forEach((article, index) => {
-    const domain = extractDomain(article.url);
-    const emoji = getRenewableEmoji(article.title);
-    // Create 3-sentence summary
-    const summary = create3SentenceSummary(article);
-    bullets.push(`${index + 1}. ${emoji} ${summary}\n   Source: [${domain}](${article.url})`);
-  });
-
-  return bullets.join('\n\n');
-}
-
-function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
-  if (traditionalNews.length === 0) {
-    return "1. 🛢️ Oil and gas markets show mixed signals amid global uncertainty\n2. ⛽ Traditional energy sector adapts to changing market dynamics\n3. 📊 Fossil fuel companies continue strategic pivots";
-  }
-
-  const bullets: string[] = [];
-  
-  // Prioritize premium sources, then sort by relevance score
-  const topStories = prioritizeNewsources(traditionalNews).slice(0, 2);
-  
-  topStories.forEach((article, index) => {
-    const domain = extractDomain(article.url);
-    const emoji = getTraditionalEmoji(article.title);
-    // Create 3-sentence summary
-    const summary = create3SentenceSummary(article);
-    bullets.push(`${index + 1}. ${emoji} ${summary}\n   Source: [${domain}](${article.url})`);
-  });
-
-  return bullets.join('\n\n');
-}
-
-function create3SentenceSummary(article: NewsResult): string {
-  if (!article.content || article.content.length < 50) {
-    // Fallback: just use title
-    return article.title;
-  }
-
-  // Quick clean and truncate - optimized for speed
-  const cleanContent = article.content
-    .replace(/ADVERTISEMENT|Subscribe to|Sign up for/gi, '')
-    .substring(0, 150);
-  
-  const lastDot = cleanContent.lastIndexOf('.');
-  return lastDot > 30 ? cleanContent.substring(0, lastDot + 1) : cleanContent + '...';
-}
-
-function prioritizeNewsources(articles: NewsResult[]): NewsResult[] {
-  // Premium sources that should always be prioritized
-  const premiumSources = [
-    'bloomberg.com',
-    'reuters.com',
-    'wsj.com',
-    'ft.com',
-    'cnbc.com',
-    'marketwatch.com',
-    'oilprice.com',
-    'energyvoice.com'
-  ];
-
-  // Separate premium and other sources
-  const premiumArticles: NewsResult[] = [];
-  const otherArticles: NewsResult[] = [];
-
-  articles.forEach(article => {
-    const domain = extractDomain(article.url);
-    if (premiumSources.includes(domain)) {
-      premiumArticles.push(article);
-    } else {
-      otherArticles.push(article);
+  newsData.forEach(article => {
+    const text = (article.title + ' ' + (article.content || '')).toLowerCase();
+    
+    if (text.includes('solar') || text.includes('wind') || text.includes('renewable') || 
+        text.includes('electric') || text.includes('battery') || text.includes('clean')) {
+      renewable.push(article);
+    } else if (text.includes('oil') || text.includes('gas') || text.includes('opec') || 
+               text.includes('crude') || text.includes('petroleum')) {
+      conventional.push(article);
     }
   });
+  
+  // Prioritize popular sites and take top 3 each
+  const sortByPopularity = (articles: NewsResult[]) => {
+    return articles
+      .sort((a, b) => {
+        const aDomain = extractDomain(a.url);
+        const bDomain = extractDomain(b.url);
+        const aPopular = popularSites.includes(aDomain) ? 1000 : 0;
+        const bPopular = popularSites.includes(bDomain) ? 1000 : 0;
+        return (bPopular + (b.score || 0)) - (aPopular + (a.score || 0));
+      })
+      .slice(0, 3);
+  };
+  
+  return {
+    renewableNews: sortByPopularity(renewable),
+    conventionalNews: sortByPopularity(conventional)
+  };
+}
 
-  // Sort both groups by relevance score
-  premiumArticles.sort((a, b) => (b.score || 0) - (a.score || 0));
-  otherArticles.sort((a, b) => (b.score || 0) - (a.score || 0));
+function formatNewsSection(renewableNews: NewsResult[], conventionalNews: NewsResult[]): string {
+  let newsSection = '';
+  let counter = 1;
+  
+  // Format all 6 news items with minimal emojis
+  [...renewableNews, ...conventionalNews].forEach(article => {
+    const domain = extractDomain(article.url);
+    const summary = createFastSummary(article);
+    const emoji = counter <= 3 ? '🔋' : '⛽'; // Minimal emoji use
+    
+    newsSection += `${counter}. ${emoji} ${summary}\n   Source: [${domain}](${article.url})\n\n`;
+    counter++;
+  });
+  
+  return newsSection.trim();
+}
 
-  // Return premium sources first, then others
-  return [...premiumArticles, ...otherArticles];
+function createFastSummary(article: NewsResult): string {
+  if (!article.content || article.content.length < 30) {
+    return article.title;
+  }
+  
+  // Fast 2-3 sentence summary - optimized for 10s execution
+  const clean = article.content.replace(/ADVERTISEMENT|Subscribe/gi, '').substring(0, 120);
+  const sentences = clean.split('.').filter(s => s.length > 20);
+  
+  if (sentences.length >= 2) {
+    return sentences[0] + '. ' + sentences[1] + '.';
+  }
+  return clean + (clean.endsWith('.') ? '' : '...');
 }
 
 function extractDomain(url: string): string {
