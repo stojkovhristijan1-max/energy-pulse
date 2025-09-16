@@ -143,14 +143,20 @@ ${analysis.reasoning.length > 500 ? analysis.reasoning.substring(0, 497) + '...'
 }
 
 function getMixedEnergyNews(newsData: NewsResult[]): NewsResult[] {
-  // Get all news and prioritize popular sites
-  const popularSites = ['bloomberg.com', 'reuters.com', 'cnbc.com', 'wsj.com', 'ft.com', 'marketwatch.com', 'oilprice.com'];
+  // English-language popular sites only
+  const englishSites = ['bloomberg.com', 'reuters.com', 'cnbc.com', 'wsj.com', 'ft.com', 'marketwatch.com', 'oilprice.com', 'energyvoice.com'];
+  
+  // Filter for English articles only
+  const englishArticles = newsData.filter(article => {
+    const domain = extractDomain(article.url);
+    return englishSites.includes(domain) || isEnglishContent(article);
+  });
   
   // Separate renewable and conventional news
   const renewable: NewsResult[] = [];
   const conventional: NewsResult[] = [];
   
-  newsData.forEach(article => {
+  englishArticles.forEach(article => {
     const text = (article.title + ' ' + (article.content || '')).toLowerCase();
     
     if (text.includes('solar') || text.includes('wind') || text.includes('renewable') || 
@@ -166,42 +172,72 @@ function getMixedEnergyNews(newsData: NewsResult[]): NewsResult[] {
     return articles.sort((a, b) => {
       const aDomain = extractDomain(a.url);
       const bDomain = extractDomain(b.url);
-      const aPopular = popularSites.includes(aDomain) ? 1000 : 0;
-      const bPopular = popularSites.includes(bDomain) ? 1000 : 0;
+      const aPopular = englishSites.includes(aDomain) ? 1000 : 0;
+      const bPopular = englishSites.includes(bDomain) ? 1000 : 0;
       return (bPopular + (b.score || 0)) - (aPopular + (a.score || 0));
     });
   };
   
-  // Take 2-3 renewable and 3-4 conventional to total 5-6 stories
-  const topRenewable = sortByPopularity(renewable).slice(0, 3);
+  // Take 2-3 renewable and 3 conventional to total 5 stories
+  const topRenewable = sortByPopularity(renewable).slice(0, 2);
   const topConventional = sortByPopularity(conventional).slice(0, 3);
   
-  // Mix them together, ensuring we get renewable stories
-  return [...topConventional, ...topRenewable].slice(0, 5);
+  // Mix them together
+  return [...topConventional, ...topRenewable];
 }
 
 function formatMixedNewsSection(mixedNews: NewsResult[], analysis: AnalysisResult): string {
   return mixedNews.map((article, index) => {
     const domain = extractDomain(article.url);
-    // Use the summary from analysis if available, otherwise create one
-    const summaryPoint = analysis.summary[index];
-    const summary = summaryPoint ? summaryPoint.text : createFastSummary(article);
-    const sourceUrl = summaryPoint ? summaryPoint.source_url : article.url;
+    // Create 2-3 sentence summary from the actual article content
+    const summary = summarizeArticleInBulletPoint(article);
     
-    return `• ${summary}\n  📰 [Source](${sourceUrl})`;
+    return `• ${summary}\n  📰 [Source](${article.url})`;
   }).join('\n\n');
 }
 
-function createFastSummary(article: NewsResult): string {
-  if (!article.content || article.content.length < 30) {
+function summarizeArticleInBulletPoint(article: NewsResult): string {
+  if (!article.content || article.content.length < 50) {
+    // If no content, use title as summary
     return article.title;
   }
   
-  // Fast summary - optimized for 10s execution
-  const clean = article.content.replace(/ADVERTISEMENT|Subscribe/gi, '').substring(0, 150);
-  const sentences = clean.split('.').filter(s => s.length > 15);
+  // Clean content and remove ads/subscriptions
+  let content = article.content
+    .replace(/ADVERTISEMENT|Subscribe to|Sign up for|Get unlimited access|Click here|Read more/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   
-  return sentences.length >= 1 ? sentences[0] + '.' : clean + '...';
+  // Split into sentences
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+  
+  if (sentences.length >= 2) {
+    // Take first 2 sentences for 2-sentence summary
+    const summary = sentences.slice(0, 2).join('. ').trim();
+    return summary.length > 250 ? summary.substring(0, 247) + '...' : summary + '.';
+  } else if (sentences.length === 1) {
+    // Single sentence, add context
+    const sentence = sentences[0].trim();
+    return sentence.length > 200 ? sentence.substring(0, 197) + '...' : sentence + '.';
+  } else {
+    // Fallback to first 150 characters
+    return content.substring(0, 150) + '...';
+  }
+}
+
+function isEnglishContent(article: NewsResult): boolean {
+  // Simple English detection - check for common English words
+  const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+  const text = (article.title + ' ' + (article.content || '')).toLowerCase();
+  
+  let englishWordCount = 0;
+  englishWords.forEach(word => {
+    if (text.includes(' ' + word + ' ')) {
+      englishWordCount++;
+    }
+  });
+  
+  return englishWordCount >= 3; // If at least 3 English words found
 }
 
 function extractDomain(url: string): string {
