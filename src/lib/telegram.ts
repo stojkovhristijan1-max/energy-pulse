@@ -178,9 +178,9 @@ function getMixedEnergyNews(newsData: NewsResult[]): NewsResult[] {
     });
   };
   
-  // Take 2-3 renewable and 3 conventional to total 5 stories
+  // Take 2 renewable and 2 conventional to total 4 stories for speed
   const topRenewable = sortByPopularity(renewable).slice(0, 2);
-  const topConventional = sortByPopularity(conventional).slice(0, 3);
+  const topConventional = sortByPopularity(conventional).slice(0, 2);
   
   // Mix them together
   return [...topConventional, ...topRenewable];
@@ -198,46 +198,42 @@ function formatMixedNewsSection(mixedNews: NewsResult[], analysis: AnalysisResul
 
 function summarizeArticleInBulletPoint(article: NewsResult): string {
   if (!article.content || article.content.length < 50) {
-    // If no content, use title as summary
     return article.title;
   }
   
-  // Clean content and remove ads/subscriptions
-  let content = article.content
-    .replace(/ADVERTISEMENT|Subscribe to|Sign up for|Get unlimited access|Click here|Read more/gi, '')
-    .replace(/\s+/g, ' ')
+  // Fast clean - only remove most common ads, limit to first 300 chars for speed
+  const content = article.content
+    .substring(0, 300)
+    .replace(/ADVERTISEMENT|Subscribe/gi, '')
     .trim();
   
-  // Split into sentences
-  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+  // Quick sentence split - take first 2 sentences only
+  const sentences = content.split(/[.!?]/).filter(s => s.trim().length > 15);
   
   if (sentences.length >= 2) {
-    // Take first 2 sentences for 2-sentence summary
-    const summary = sentences.slice(0, 2).join('. ').trim();
-    return summary.length > 250 ? summary.substring(0, 247) + '...' : summary + '.';
+    const summary = sentences[0].trim() + '. ' + sentences[1].trim() + '.';
+    return summary.length > 200 ? summary.substring(0, 197) + '...' : summary;
   } else if (sentences.length === 1) {
-    // Single sentence, add context
-    const sentence = sentences[0].trim();
-    return sentence.length > 200 ? sentence.substring(0, 197) + '...' : sentence + '.';
+    const sentence = sentences[0].trim() + '.';
+    return sentence.length > 180 ? sentence.substring(0, 177) + '...' : sentence;
   } else {
-    // Fallback to first 150 characters
-    return content.substring(0, 150) + '...';
+    return content.substring(0, 120) + '...';
   }
 }
 
 function isEnglishContent(article: NewsResult): boolean {
-  // Simple English detection - check for common English words
-  const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
-  const text = (article.title + ' ' + (article.content || '')).toLowerCase();
+  // Fast English check - just check title for speed
+  const title = article.title.toLowerCase();
+  const englishWords = ['the', 'and', 'in', 'to', 'for', 'of'];
   
-  let englishWordCount = 0;
-  englishWords.forEach(word => {
-    if (text.includes(' ' + word + ' ')) {
-      englishWordCount++;
-    }
-  });
+  // Quick check - if title contains any 2 common English words, it's likely English
+  let count = 0;
+  for (const word of englishWords) {
+    if (title.includes(word)) count++;
+    if (count >= 2) return true;
+  }
   
-  return englishWordCount >= 3; // If at least 3 English words found
+  return false;
 }
 
 function extractDomain(url: string): string {
