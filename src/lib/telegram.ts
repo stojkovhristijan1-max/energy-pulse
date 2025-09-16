@@ -132,14 +132,16 @@ function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
     'marketwatch.com', 'oilprice.com', 'energyvoice.com', 'platts.com'
   ];
   
-  // Filter for English articles from trusted sources with quality content
+  // Filter for English articles from trusted sources 
   const trustedArticles = newsData.filter(article => {
     const domain = extractDomain(article.url);
     const isTrustedSource = trustedSources.includes(domain);
     const isEnglish = isEnglishContent(article);
     const hasQualityContent = isQualityNewsContent(article);
     
-    return isTrustedSource && isEnglish && hasQualityContent;
+    // Accept trusted sources with English content, even if quality check fails
+    // Or accept any English article that passes quality check
+    return isEnglish && (isTrustedSource || hasQualityContent);
   });
   
   // Sort by relevance (score) and source trustworthiness
@@ -151,8 +153,8 @@ function getMostRelevantEnergyNews(newsData: NewsResult[]): NewsResult[] {
     return (bBonus + (b.score || 0)) - (aBonus + (a.score || 0));
   });
   
-  // Take top 5 most relevant stories
-  return sortedByRelevance.slice(0, 5);
+  // Take top 6 most relevant stories 
+  return sortedByRelevance.slice(0, 6);
 }
 
 function formatNewsWithAnalysis(newsArticles: NewsResult[]): string {
@@ -181,21 +183,24 @@ function analyzeAndSummarizeArticle(article: NewsResult): string {
     .map(s => s.trim());
   
   if (sentences.length >= 2) {
-    // Take first 2 complete sentences
-    const summary = sentences.slice(0, 2).join('. ').trim() + '.';
-    // Ensure we don't cut off mid-word
-    if (summary.length > 200) {
-      const truncated = summary.substring(0, 197);
-      const lastSpace = truncated.lastIndexOf(' ');
-      return truncated.substring(0, lastSpace) + '...';
+    // Create a proper 2-3 sentence summary without truncation
+    let summary = sentences.slice(0, 2).join('. ').trim();
+    
+    // Add third sentence if the first two are short
+    if (summary.length < 120 && sentences.length >= 3) {
+      summary += '. ' + sentences[2].trim();
     }
+    
+    // Ensure proper ending
+    if (!summary.endsWith('.')) {
+      summary += '.';
+    }
+    
     return summary;
   } else if (sentences.length === 1) {
-    const sentence = sentences[0].trim() + '.';
-    if (sentence.length > 150) {
-      const truncated = sentence.substring(0, 147);
-      const lastSpace = truncated.lastIndexOf(' ');
-      return truncated.substring(0, lastSpace) + '...';
+    let sentence = sentences[0].trim();
+    if (!sentence.endsWith('.')) {
+      sentence += '.';
     }
     return sentence;
   } else {
@@ -207,9 +212,9 @@ function createMarketAnalysis(newsArticles: NewsResult[], analysis: AnalysisResu
   // Create a short overall analysis of energy market based on the news
   const newsContext = newsArticles.map(article => article.title).join('. ');
   
-  // Use the AI analysis but focus on market implications
-  const marketInsights = analysis.reasoning.length > 300 
-    ? analysis.reasoning.substring(0, 297) + '...' 
+  // Keep analysis very short for speed - under 10 second limit
+  const marketInsights = analysis.reasoning.length > 200 
+    ? analysis.reasoning.substring(0, 197) + '...' 
     : analysis.reasoning;
   
   return marketInsights;
@@ -220,25 +225,30 @@ function isEnglishContent(article: NewsResult): boolean {
   const content = (article.content || '').toLowerCase();
   const text = title + ' ' + content.substring(0, 200);
   
-  const englishWords = ['the', 'and', 'in', 'to', 'for', 'of', 'with', 'by', 'on', 'at'];
-  const germanWords = ['der', 'die', 'das', 'und', 'mit', 'von', 'zu', 'auf'];
+  const englishWords = ['the', 'and', 'in', 'to', 'for', 'of', 'with', 'by', 'on', 'at', 'is', 'are', 'will', 'has'];
+  const nonEnglishWords = ['der', 'die', 'das', 'und', 'mit', 'von', 'zu', 'auf', 'est', 'une', 'des', 'dans', 'sur'];
   
   let englishCount = 0;
-  let germanCount = 0;
+  let nonEnglishCount = 0;
   
+  // Check for English words
   for (const word of englishWords) {
-    if (text.includes(' ' + word + ' ') || text.startsWith(word + ' ') || text.endsWith(' ' + word)) {
+    const regex = new RegExp(`\\b${word}\\b`, 'i');
+    if (regex.test(text)) {
       englishCount++;
     }
   }
   
-  for (const word of germanWords) {
-    if (text.includes(' ' + word + ' ') || text.startsWith(word + ' ') || text.endsWith(' ' + word)) {
-      germanCount++;
+  // Check for non-English words
+  for (const word of nonEnglishWords) {
+    const regex = new RegExp(`\\b${word}\\b`, 'i');
+    if (regex.test(text)) {
+      nonEnglishCount++;
     }
   }
   
-  return englishCount >= 2 && germanCount === 0;
+  // More lenient: 2+ English words and max 1 non-English word
+  return englishCount >= 2 && nonEnglishCount <= 1;
 }
 
 function extractDomain(url: string): string {
@@ -264,11 +274,11 @@ function isQualityNewsContent(article: NewsResult): boolean {
     title.includes(pattern) || content.includes(pattern)
   );
   
-  // Must have substantial content
-  const hasSubstantialContent = Boolean(article.content && article.content.length > 100);
+  // Must have some content (more lenient)
+  const hasSubstantialContent = Boolean(article.content && article.content.length > 50);
   
-  // Must be actual news, not just data
-  const isActualNews = title.length > 20 && !title.includes('•') && !title.includes('|');
+  // Must be actual news, not just data (more lenient)
+  const isActualNews = title.length > 15 && !title.includes('•');
   
   return !hasBadPattern && hasSubstantialContent && isActualNews;
 }
