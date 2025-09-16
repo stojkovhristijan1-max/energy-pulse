@@ -261,16 +261,34 @@ function generateTraditionalNewsBullets(traditionalNews: NewsResult[]): string {
 
 function create3SentenceSummary(article: NewsResult): string {
   if (!article.content || article.content.length < 50) {
-    // Fallback: create summary from title
-    return `${article.title}. Market impact expected. Details emerging.`;
+    // Fallback: just use title
+    return article.title;
   }
 
-  // Simple approach: take first 200 chars, add context
-  const firstPart = article.content.substring(0, 150).trim();
-  const lastDot = firstPart.lastIndexOf('.');
-  const summary = lastDot > 50 ? firstPart.substring(0, lastDot + 1) : firstPart + '.';
+  // Clean content - remove advertisements and subscription prompts
+  let cleanContent = article.content
+    .replace(/ADVERTISEMENT/gi, '')
+    .replace(/Subscribe to/gi, '')
+    .replace(/Sign up for/gi, '')
+    .replace(/Get unlimited access/gi, '')
+    .replace(/Read more:/gi, '')
+    .replace(/Click here/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // Take first 200 characters and find natural sentence break
+  const summary = cleanContent.substring(0, 200);
+  const lastPeriod = summary.lastIndexOf('.');
+  const lastQuestion = summary.lastIndexOf('?');
+  const lastExclamation = summary.lastIndexOf('!');
   
-  return `${summary} This could impact energy markets. Analysts are monitoring developments.`;
+  const lastSentenceEnd = Math.max(lastPeriod, lastQuestion, lastExclamation);
+  
+  if (lastSentenceEnd > 50) {
+    return summary.substring(0, lastSentenceEnd + 1);
+  } else {
+    return summary + '...';
+  }
 }
 
 function prioritizeNewsources(articles: NewsResult[]): NewsResult[] {
