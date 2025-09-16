@@ -109,7 +109,8 @@ export function formatAnalysisForTelegram(analysis: AnalysisResult, newsData?: N
   // Get the most relevant daily energy news from trustworthy sources
   const relevantNews = getMostRelevantEnergyNews(newsData || []);
 
-  let message = `Energy Daily Report - ${date}
+  let message = `⚡ Energy Pulse Daily Report
+${date}
 
 📰 *Today's Most Relevant Energy News:*
 
@@ -218,15 +219,8 @@ function analyzeAndSummarizeArticle(article: NewsResult): string {
 }
 
 function createMarketAnalysis(newsArticles: NewsResult[], analysis: AnalysisResult): string {
-  // Create a short overall analysis of energy market based on the news
-  const newsContext = newsArticles.map(article => article.title).join('. ');
-  
-  // Keep analysis very short for speed - under 10 second limit
-  const marketInsights = analysis.reasoning.length > 200 
-    ? analysis.reasoning.substring(0, 197) + '...' 
-    : analysis.reasoning;
-  
-  return marketInsights;
+  // Return the complete analysis without truncation
+  return analysis.reasoning;
 }
 
 function isEnglishContent(article: NewsResult): boolean {

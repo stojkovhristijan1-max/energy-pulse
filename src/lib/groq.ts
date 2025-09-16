@@ -75,7 +75,7 @@ Please provide your analysis in the following JSON format. For each summary bull
       "reasoning": "Specific reasoning for utilities outlook"
     }
   },
-  "reasoning": "Comprehensive analysis explaining the interconnections between news events, market data, and predictions. Include historical context, key risks, and catalysts to watch. Minimum 200 words."
+  "reasoning": "Concise but complete market analysis explaining key trends, interconnections between news events and market data. Include main risks and catalysts to watch. Keep focused and under 300 words for fast delivery."
 }
 
 ANALYSIS GUIDELINES:
