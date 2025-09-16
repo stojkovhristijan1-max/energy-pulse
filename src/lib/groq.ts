@@ -41,11 +41,19 @@ Please provide your analysis in the following JSON format. For each summary bull
       "source_url": "URL from the news data that supports this point"
     },
     {
-      "text": "Key bullet point 3 about supply/demand or policy",
+      "text": "Key bullet point 3 about geopolitical factors", 
       "source_url": "URL from the news data that supports this point"
     },
     {
-      "text": "Key bullet point 4 about energy sector outlook",
+      "text": "Key bullet point 4 about supply/demand dynamics",
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 5 about regulatory/policy impacts",
+      "source_url": "URL from the news data that supports this point"
+    },
+    {
+      "text": "Key bullet point 6 about energy sector outlook",
       "source_url": "URL from the news data that supports this point"
     }
   ],

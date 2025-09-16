@@ -167,7 +167,8 @@ export async function GET(request: NextRequest) {
     systemMonitor.recordDelivery(totalSubscribers, totalMessagesSent);
 
     // Check system health and send alerts if needed
-    await systemMonitor.checkHealthAndAlert();
+    // Temporarily disabled to debug timeout issue
+    // await systemMonitor.checkHealthAndAlert();
 
     return NextResponse.json({
       success: true,
