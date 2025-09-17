@@ -1,81 +1,38 @@
-// Trigger a test message with today's news
 const fetch = require('node-fetch');
-const fs = require('fs');
-const path = require('path');
-
-// Load .env.local manually
-const envPath = path.join(__dirname, '.env.local');
-if (fs.existsSync(envPath)) {
-  const envContent = fs.readFileSync(envPath, 'utf8');
-  const envLines = envContent.split('\n');
-  
-  envLines.forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const [key, ...valueParts] = trimmed.split('=');
-      if (key && valueParts.length > 0) {
-        process.env[key.trim()] = valueParts.join('=').trim();
-      }
-    }
-  });
-}
 
 async function triggerTestMessage() {
+  const startTime = Date.now();
+  
   try {
-    console.log('🚀 Triggering live analysis with today\'s news...');
-    console.log('This will:');
-    console.log('- Fetch real energy news from Tavily');
-    console.log('- Get live market data from Yahoo Finance');
-    console.log('- Generate AI analysis with Groq');
-    console.log('- Send message to all Telegram subscribers');
-    console.log('');
-
-    const response = await fetch('https://energy-pulse.vercel.app/api/cron', {
+    console.log('🚀 Triggering test message...');
+    
+    const response = await fetch('https://energy-insights-chi.vercel.app/api/cron', {
       method: 'GET',
       headers: {
-        'User-Agent': 'manual-test-trigger',
-        'X-Manual-Test': 'true'
+        'Content-Type': 'application/json'
       }
     });
 
-    console.log('Response status:', response.status);
+    const endTime = Date.now();
+    const executionTime = (endTime - startTime) / 1000;
+    
+    console.log(`⏱️  Execution time: ${executionTime.toFixed(2)} seconds`);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Error:', errorText);
+      console.error(`❌ HTTP Error ${response.status}:`, errorText);
       return;
     }
 
-    const data = await response.json();
-    console.log('✅ Analysis completed and sent!');
-    console.log('');
-    console.log('📊 Summary:');
-    console.log(`- News articles processed: ${data.data?.summary?.news_articles || 0}`);
-    console.log(`- Market symbols analyzed: ${data.data?.summary?.market_symbols || 0}`);
-    console.log(`- Predictions generated: ${data.data?.summary?.predictions_generated || 0}`);
-    console.log(`- Telegram delivery: ${data.data?.summary?.telegram_delivery || 'unknown'}`);
-    
-    if (data.data?.analysis?.summary) {
-      console.log('');
-      console.log('🎯 Key Insights Sent to Telegram:');
-      data.data.analysis.summary.forEach((item, index) => {
-        console.log(`${index + 1}. ${item.text}`);
-        if (item.source_url) {
-          console.log(`   📰 Source: ${item.source_url}`);
-        }
-        console.log('');
-      });
-    }
-
-    console.log('🎉 Check your Telegram bot now - subscribers should have received the message!');
-    console.log('Bot: @energypulsebot');
+    const result = await response.text();
+    console.log('✅ Response:', result);
+    console.log(`🎯 Target: <8 seconds | Actual: ${executionTime.toFixed(2)}s | Status: ${executionTime < 8 ? '✅ PASS' : '❌ FAIL'}`);
     
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    const endTime = Date.now();
+    const executionTime = (endTime - startTime) / 1000;
+    console.error(`❌ Error after ${executionTime.toFixed(2)}s:`, error.message);
   }
 }
 
-console.log('⚡ LIVE ENERGY ANALYSIS TEST');
-console.log('============================');
 triggerTestMessage();
-
