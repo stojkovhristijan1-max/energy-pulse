@@ -164,7 +164,7 @@ export async function getMarketMovingNews(): Promise<NewsResult[]> {
         
         return weightB - weightA;
       })
-      .slice(0, 10); // Top 10 most relevant and recent (optimized for free tier)
+      .slice(0, 6); // Top 6 most relevant and recent (optimized for 8s execution)
   } catch (error) {
     console.error('Error getting market moving news:', error);
     throw new Error(`Failed to get market moving news: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -175,7 +175,7 @@ export async function summarizeNewsForAnalysis(newsResults: NewsResult[]): Promi
   try {
     // Create a comprehensive summary of all news articles
     const newsSummary = newsResults
-      .slice(0, 10) // Limit to top 10 articles
+      .slice(0, 6) // Limit to top 6 articles for 8s execution
       .map((article, index) => {
         const date = new Date(article.published_date).toLocaleDateString();
         return `${index + 1}. [${date}] ${article.title}\n   ${article.content.substring(0, 200)}...`;

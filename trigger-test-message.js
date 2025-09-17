@@ -6,7 +6,7 @@ async function triggerTestMessage() {
   try {
     console.log('🚀 Triggering test message...');
     
-    const response = await fetch('https://energy-insights-chi.vercel.app/api/cron', {
+    const response = await fetch('https://energy-pulse.vercel.app/api/cron', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
