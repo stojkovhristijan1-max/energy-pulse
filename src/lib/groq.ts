@@ -87,7 +87,7 @@ Please provide your analysis in the following JSON format. For each summary bull
       "reasoning": "Specific reasoning for utilities outlook"
     }
   },
-  "reasoning": "Brief complete market analysis in 2-3 sentences max. Focus on key trend and main catalyst. Must be under 150 words total for 10-second execution limit."
+        "reasoning": "Ultra-brief market analysis in 1-2 sentences. Key trend + main catalyst only. Under 100 words for 8-second execution."
 }
 
 ANALYSIS GUIDELINES:
@@ -105,7 +105,7 @@ ANALYSIS GUIDELINES:
         messages: [{ role: 'user', content: prompt }],
         model: 'llama-3.1-8b-instant',
         temperature: 0.3,
-        max_tokens: 1500,
+        max_tokens: 1000,
         response_format: { type: 'json_object' }
       }),
       3,

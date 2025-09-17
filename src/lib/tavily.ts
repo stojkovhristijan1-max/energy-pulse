@@ -16,7 +16,7 @@ export async function searchEnergyNews(query: string): Promise<NewsResult[]> {
           query: `${query} energy market news today`,
           search_depth: 'advanced',
           include_answer: true,
-          max_results: 4,
+          max_results: 3,
           include_domains: [
             // Traditional Financial & Energy News
             'bloomberg.com',
@@ -128,12 +128,11 @@ export async function searchSpecificEnergyTopics(): Promise<{
 export async function getMarketMovingNews(): Promise<NewsResult[]> {
   try {
     const queries = [
-      // Balanced coverage - 5 key energy sectors
+      // Balanced coverage - 4 key energy sectors (optimized for speed)
       'OPEC oil prices energy market news',
       'renewable energy solar wind policy',
       'natural gas energy infrastructure',
-      'electric vehicles EV battery storage',
-      'energy company earnings climate transition'
+      'electric vehicles EV battery storage'
     ];
 
     const searchPromises = queries.map(query => 
